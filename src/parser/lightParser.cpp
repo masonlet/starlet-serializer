@@ -1,11 +1,11 @@
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/sceneParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/component/light.hpp"
 #include "StarletScene/component/transform.hpp"
 #include "StarletScene/component/colour.hpp"
 
-bool Parser::parseLightType(const unsigned char*& p, LightType& type) {
+bool SceneParser::parseLightType(const unsigned char*& p, LightType& type) {
 	p = skipWhitespace(p);
 	if (!p || *p == '\0') return false;
 
@@ -37,14 +37,14 @@ bool Parser::parseLightType(const unsigned char*& p, LightType& type) {
 	return true;
 }
 
-bool Parser::parseLight(const unsigned char*& p, Light& light, TransformComponent& transform, ColourComponent& colour) {
+bool SceneParser::parseLight(const unsigned char*& p, Light& light, TransformComponent& transform, ColourComponent& colour) {
 	PARSE_OR(return false, parseBool, light.enabled, "light enabled");
 	PARSE_STRING_OR(return false, p, light.name, 64, "light name");
 	PARSE_OR(return false, parseLightType, light.type, "light type");
-	PARSE_OR(return false, parseVec3, transform.pos, "light position");
-	PARSE_OR(return false, parseVec3, transform.rot, "light direction");
-	PARSE_OR(return false, parseVec4, colour.colour, "light diffuse");
-	PARSE_OR(return false, parseVec4, light.attenuation, "light attenuation");
+	PARSE_OR(return false, parseVec3f, transform.pos, "light position");
+	PARSE_OR(return false, parseVec3f, transform.rot, "light direction");
+	PARSE_OR(return false, parseVec4f, colour.colour, "light diffuse");
+	PARSE_OR(return false, parseVec4f, light.attenuation, "light attenuation");
 	PARSE_OR(return false, parseVec2f, light.param1, "light param1");
 	return true;
 }

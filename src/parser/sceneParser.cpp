@@ -1,4 +1,4 @@
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/sceneParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletScene/component/model.hpp"
@@ -13,7 +13,7 @@
 
 #include "StarletScene/scene.hpp"
 
-bool Parser::parseScene(Scene& scene, const std::string& path) {
+bool SceneParser::parse(Scene& scene, const std::string& path) {
 	std::string src{};
 	if (!loadFile(src, path)) return error("SceneLoader", "loadScene", "Failed to load path: " + path);
 
@@ -42,7 +42,7 @@ bool Parser::parseScene(Scene& scene, const std::string& path) {
 	return true;
 }
 
-bool Parser::parseSceneLine(const unsigned char* p, Scene& scene) {
+bool SceneParser::parseSceneLine(const unsigned char*& p, Scene& scene) {
 	if (!p || *p == '\0') return true;
 
 	unsigned char token[64]{};
@@ -161,7 +161,7 @@ bool Parser::parseSceneLine(const unsigned char* p, Scene& scene) {
 		if (!parseBool(p, enabled)) return error("SceneLoader", "processSceneLine", "Failed to parse ambient enabled");
 
 		Vec3 colour{ 0.0f, 0.0f, 0.0f };
-		if (!parseVec3(p, colour)) return error("SceneLoader", "processSceneLine", "Failed to parse ambient colour");
+		if (!parseVec3f(p, colour)) return error("SceneLoader", "processSceneLine", "Failed to parse ambient colour");
 
 		if (enabled) scene.setAmbientLight({ colour, 1.0f });
 		else scene.setAmbientLight(Vec4{ 0.0f, 0.0f, 0.0f, 1.0f });

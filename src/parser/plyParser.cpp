@@ -1,4 +1,4 @@
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/plyParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletGraphics/resource/meshCPU.hpp"
@@ -6,7 +6,7 @@
 
 #include <string>
 
-bool Parser::parsePlyMesh(const std::string& path, MeshCPU& drawInfo) {
+bool PlyParser::parse(const std::string& path, MeshCPU& drawInfo) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path))
 		return false;
@@ -16,7 +16,7 @@ bool Parser::parsePlyMesh(const std::string& path, MeshCPU& drawInfo) {
 	const unsigned char* p = file.data();
 	std::string errorMsg;
 	while (true) {
-		if (!parsePlyHeader(p, drawInfo.numVertices, drawInfo.numTriangles, drawInfo.hasNormals, drawInfo.hasColours, drawInfo.hasTexCoords)) {
+		if (!parseHeaderLine(p, drawInfo.numVertices, drawInfo.numTriangles, drawInfo.hasNormals, drawInfo.hasColours, drawInfo.hasTexCoords)) {
 			errorMsg = "header or missing 'end_header'";
 			break;
 		}
@@ -48,7 +48,7 @@ bool Parser::parsePlyMesh(const std::string& path, MeshCPU& drawInfo) {
 	return error("PlyParser", "LoadModelFromFile", ("Failed to parse " + errorMsg + '\n').c_str());
 }
 
-bool Parser::parsePlyHeader(const unsigned char*& p, unsigned int& numVerticesOut, unsigned int& numTrianglesOut, bool& hasNormalsOut, bool& hasColoursOut, bool& hasTexCoordsOut) {
+bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVerticesOut, unsigned int& numTrianglesOut, bool& hasNormalsOut, bool& hasColoursOut, bool& hasTexCoordsOut) {
 	if (!p) return error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
 	p = skipWhitespace(p);
 
@@ -65,11 +65,11 @@ bool Parser::parsePlyHeader(const unsigned char*& p, unsigned int& numVerticesOu
 		}
 
 		if (strncmp((const char*)p, "element", 7) == 0 && (p[7] == ' ' || p[7] == '\t')) {
-			if (!parsePlyElementLine(p, numVerticesOut, numTrianglesOut))
+			if (!parseElementLine(p, numVerticesOut, numTrianglesOut))
 				return false;
 		}
 		else if (strncmp((const char*)p, "property", 8) == 0) {
-			if (!parsePlyPropertyLine(p, hasNx, hasNy, hasNz, hasRed, hasGreen, hasBlue, hasU, hasV))
+			if (!parsePropertyLine(p, hasNx, hasNy, hasNz, hasRed, hasGreen, hasBlue, hasU, hasV))
 				return false;
 		}
 		else if (strncmp((const char*)p, "end_header", 10) == 0) {
@@ -90,7 +90,7 @@ bool Parser::parsePlyHeader(const unsigned char*& p, unsigned int& numVerticesOu
 	return error("plyParser", "parsePlyHeader", "Failed, end of buffer reached");
 }
 
-bool Parser::parsePlyElementLine(const unsigned char*& p, unsigned int& verticesOut, unsigned int& trianglesOut) {
+bool PlyParser::parseElementLine(const unsigned char*& p, unsigned int& verticesOut, unsigned int& trianglesOut) {
 	if (!p) return error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
 
 	p = skipWhitespace(p += 7);
@@ -104,7 +104,7 @@ bool Parser::parsePlyElementLine(const unsigned char*& p, unsigned int& vertices
 	}
 	return false;
 }
-bool Parser::parsePlyPropertyLine(const unsigned char*& p, bool& hasNx, bool& hasNy, bool& hasNz, bool& hasR, bool& hasG, bool& hasB, bool& hasU, bool& hasV) {
+bool PlyParser::parsePropertyLine(const unsigned char*& p, bool& hasNx, bool& hasNy, bool& hasNz, bool& hasR, bool& hasG, bool& hasB, bool& hasU, bool& hasV) {
 	if (!p) return error("PlyParser", "parsePlyPropertyLine", "Input pointer is null\n");
 	p = skipWhitespace(p += 8);
 
@@ -141,7 +141,7 @@ bool Parser::parsePlyPropertyLine(const unsigned char*& p, bool& hasNx, bool& ha
 	return true;
 }
 
-bool Parser::parseVertices(const unsigned char*& p, MeshCPU& drawInfo) {
+bool PlyParser::parseVertices(const unsigned char*& p, MeshCPU& drawInfo) {
 	if (!p) return error("PlyParser", "parseVertices", "Input pointer is null\n");
 	if (!drawInfo.numVertices) return error("PlyParser", "parseVertices", "No vertices declared in header\n");
 
@@ -247,7 +247,7 @@ bool Parser::parseVertices(const unsigned char*& p, MeshCPU& drawInfo) {
 	drawInfo.maxY = maxY;
 	return true;
 }
-bool Parser::parseIndices(const unsigned char*& p, MeshCPU& drawInfo) {
+bool PlyParser::parseIndices(const unsigned char*& p, MeshCPU& drawInfo) {
 	if (!p) return error("PlyParser", "parseIndices", "Input pointer is null");
 	if (drawInfo.indices.empty() || drawInfo.numIndices == 0) return error("PlyParser", "parseIndices", "Index buffer not allocated");
 

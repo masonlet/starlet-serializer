@@ -1,11 +1,11 @@
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/bmpParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletGraphics/resource/textureCPU.hpp"
 
 #include <cstdio>
 
-bool Parser::parseBMP(const std::string& path, TextureCPU& out) {
+bool BmpParser::parse(const std::string& path, TextureCPU& out) {
 	out.freePixels();
 	out.width = out.height = 0;
 
@@ -57,7 +57,7 @@ bool Parser::parseBMP(const std::string& path, TextureCPU& out) {
 	return true;
 }
 
-bool Parser::parseBmpHeader(const unsigned char* p, size_t fileSize, int32_t& height, int32_t& width, uint32_t& dataOffset) {
+bool BmpParser::parseBmpHeader(const unsigned char* p, size_t fileSize, int32_t& height, int32_t& width, uint32_t& dataOffset) {
 	if (!p) return error("BMPParser", "readHeader", "Null buffer");
 	if (fileSize < 54) return error("BMPParser", "parseBMP", "File too small: " + std::to_string(fileSize) + " bytes");
 	if (p[0] != 'B' || p[1] != 'M') return error("BMPParser", "readHeader", "Bad signature (not BM)");

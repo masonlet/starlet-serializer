@@ -1,4 +1,4 @@
-#include "StarletSerializer/parser.hpp"
+#include "StarletSerializer/parser/parser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
 #include "StarletMath/vec2.hpp"
@@ -9,34 +9,62 @@
 #include <cstring>
 #include <cstdio>
 
-bool Parser::isDelim(unsigned char c, bool comma) {
-	return c == 0 || c == ' ' || c == '\t' || c == '\n' || c == '\r' || (comma && c == ',');
-}
+bool Parser::loadFile(std::string& out, const std::string& path) {
+	FILE* file = fopen(path.c_str(), "rb");
+	if (!file) return error("FileParser", "loadFile", "Failed to open file: " + path);
 
-const unsigned char* Parser::skipToNextLine(const unsigned char* p) {
-	if (!p) return nullptr;
-	while (*p && *p != '\n' && *p != '\r') ++p;
-	if (*p == '\r') ++p;
-	if (*p == '\n') ++p;
-	return p;
-}
-const unsigned char* Parser::skipWhitespace(const unsigned char* p, bool skipComma) {
-	while (p && *p && isDelim(*p, skipComma)) ++p;
-	return p ? p : nullptr;
-}
-const unsigned char* Parser::trimEOL(const unsigned char* p, const unsigned char* end) {
-	while (end && *end && end > p && (end[-1] == '\n' || end[-1] == '\r' || end[-1] == ',')) --end;
-	return end ? end : nullptr;
-}
+	size_t fileSize;
+	if (!getFileSize(file, fileSize)) {
+		fclose(file);
+		return error("FileParser", "loadFile", "Failed to get file size");
+	}
 
-bool Parser::parseUInt(const unsigned char*& p, unsigned int& out) {
-	p = skipWhitespace(p);
-	if (!p || *p == '\0' || *p < '0' || *p > '9') return false;
+	out.resize(fileSize);
 
-	out = 0;
-	while (*p >= '0' && *p <= '9') out = out * 10 + (*p++ - '0');
+	size_t bytesRead = 0;
+	while (bytesRead < fileSize) {
+		size_t byteRead = fread(&out[bytesRead], 1, fileSize - bytesRead, file);
+		if (byteRead == 0) {
+			if (ferror(file)) {
+				fclose(file);
+				out.clear();
+				return error("FileParser", "loadFile", "fread failed at byte " + std::to_string(bytesRead));
+			}
+			break;
+		}
+		bytesRead += byteRead;
+	}
+
+	fclose(file);
+
+	if (bytesRead != fileSize) {
+		out.clear();
+		return error("FileParser", "loadFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
+	}
 	return true;
 }
+bool Parser::loadBinaryFile(std::vector<unsigned char>& dataOut, const std::string& path) {
+	FILE* file = fopen(path.c_str(), "rb");
+	if (!file) return error("FileParser", "loadBinaryFile", "Failed to open file: " + path);
+
+	size_t fileSize;
+	if (!getFileSize(file, fileSize)) {
+		fclose(file);
+		return error("FileParser", "loadBinaryFile", "Failed to get file size");
+	}
+
+	dataOut.resize(fileSize);
+	size_t bytesRead = fread(dataOut.data(), 1, fileSize, file);
+	fclose(file);
+
+	if (bytesRead != fileSize) {
+		dataOut.clear();
+		return error("FileParser", "loadBinaryFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
+	}
+
+	return true;
+}
+
 bool Parser::parseBool(const unsigned char*& p, bool& out) {
 	p = skipWhitespace(p);
 	if (!p || *p == '\0') return false;
@@ -52,6 +80,14 @@ bool Parser::parseBool(const unsigned char*& p, bool& out) {
 	if (strcmp(str, "false") == 0 || strcmp(str, "off") == 0) { out = false; return true; }
 
 	return false;
+}
+bool Parser::parseUInt(const unsigned char*& p, unsigned int& out) {
+	p = skipWhitespace(p);
+	if (!p || *p == '\0' || *p < '0' || *p > '9') return false;
+
+	out = 0;
+	while (*p >= '0' && *p <= '9') out = out * 10 + (*p++ - '0');
+	return true;
 }
 
 static inline int parseFloatSign(const unsigned char*& p) {
@@ -143,16 +179,6 @@ bool Parser::parseFloat(const unsigned char*& p, float& out) {
 	return true;
 }
 
-bool Parser::parseVec2f(const unsigned char*& p, Vec2<float>& out) {
-	return parseFloat(p, out.x) && parseFloat(p, out.y);
-}
-bool Parser::parseVec3(const unsigned char*& p, Vec3<float>& out) {
-	return parseFloat(p, out.x) && parseFloat(p, out.y) && parseFloat(p, out.z);
-}
-bool Parser::parseVec4(const unsigned char*& p, Vec4<float>& out) {
-	return parseFloat(p, out.x) && parseFloat(p, out.y) && parseFloat(p, out.z) && parseFloat(p, out.w);
-}
-
 bool Parser::parseToken(const unsigned char*& p, unsigned char* out, const size_t maxLength) {
 	if (!p || !out || maxLength == 0) return false;
 	p = skipWhitespace(p);
@@ -162,4 +188,49 @@ bool Parser::parseToken(const unsigned char*& p, unsigned char* out, const size_
 	while (*p && !isDelim(*p) && i + 1 < maxLength) out[i++] = *p++;
 	out[i] = '\0';
 	return true;
+}
+
+bool Parser::parseVec2f(const unsigned char*& p, Vec2<float>& out) {
+	return parseFloat(p, out.x) && parseFloat(p, out.y);
+}
+bool Parser::parseVec3f(const unsigned char*& p, Vec3<float>& out) {
+	return parseFloat(p, out.x) && parseFloat(p, out.y) && parseFloat(p, out.z);
+}
+bool Parser::parseVec4f(const unsigned char*& p, Vec4<float>& out) {
+	return parseFloat(p, out.x) && parseFloat(p, out.y) && parseFloat(p, out.z) && parseFloat(p, out.w);
+}
+
+const unsigned char* Parser::skipToNextLine(const unsigned char* p) {
+	if (!p) return nullptr;
+	while (*p && *p != '\n' && *p != '\r') ++p;
+	if (*p == '\r') ++p;
+	if (*p == '\n') ++p;
+	return p;
+}
+const unsigned char* Parser::skipWhitespace(const unsigned char* p, bool skipComma) {
+	while (p && *p && isDelim(*p, skipComma)) ++p;
+	return p ? p : nullptr;
+}
+const unsigned char* Parser::trimEOL(const unsigned char* p, const unsigned char* end) {
+	while (end && *end && end > p && (end[-1] == '\n' || end[-1] == '\r' || end[-1] == ',')) --end;
+	return end ? end : nullptr;
+}
+
+bool Parser::getFileSize(FILE* file, size_t& sizeOut) const {
+	if (fseek(file, 0, SEEK_END) != 0) return error("FileParser", "getFileSize", "Failed to seek end of file");
+
+	const long size = ftell(file);
+	if (size == -1L) return error("FileParser", "getFileSize", "Invalid file, ftell failed");
+
+	if (size <= 0 || static_cast<size_t>(size) > MAX_SIZE)
+		return error("FileParser", "getFileSize", "Invalid file size");
+
+	if (fseek(file, 0, SEEK_SET) != 0) return error("FileParser", "getFileSize", "Failed to rewind file");
+
+	sizeOut = static_cast<size_t>(size);
+	return true;
+}
+
+bool Parser::isDelim(unsigned char c, bool comma) {
+	return c == 0 || c == ' ' || c == '\t' || c == '\n' || c == '\r' || (comma && c == ',');
 }
