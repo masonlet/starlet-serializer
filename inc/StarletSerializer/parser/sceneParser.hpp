@@ -2,6 +2,24 @@
 
 #include "parser.hpp"
 
+class Scene;
+
+struct Camera;
+struct Primitive;
+struct Model;
+struct Light;
+struct Grid;
+struct TextureData;
+
+struct TransformComponent;
+struct VelocityComponent;
+struct ColourComponent;
+
+enum class ColourMode;
+enum class PrimitiveType;
+enum class GridType;
+enum class LightType;
+
 class SceneParser : public Parser {
 public:
 	bool parse(Scene& scene, const std::string& path);

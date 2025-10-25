@@ -2,6 +2,8 @@
 
 #include "parser.hpp"
 
+struct TextureCPU;
+
 class BmpParser : public Parser {
 public:
 	bool parse(const std::string& path, TextureCPU& out);

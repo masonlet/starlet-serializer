@@ -2,6 +2,8 @@
 
 #include "parser.hpp"
 
+struct MeshCPU;
+
 class PlyParser : public Parser {
 public:
 	bool parse(const std::string& path, MeshCPU& drawInfo);

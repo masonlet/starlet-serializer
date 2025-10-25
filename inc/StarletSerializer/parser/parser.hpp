@@ -4,28 +4,6 @@ template <typename T> struct Vec2;
 template <typename T> struct Vec3;
 template <typename T> struct Vec4;
 
-enum class ColourMode;
-enum class PrimitiveType;
-enum class GridType;
-enum class LightType;
-
-struct Camera;
-struct Primitive;
-struct Model;
-struct Light;
-struct Grid;
-struct TextureData;
-struct TextureConnection;
-
-struct TextureCPU;
-struct MeshCPU;
-
-struct TransformComponent;
-struct VelocityComponent;
-struct ColourComponent;
-
-class Scene;
-
 #include <string>
 #include <vector>
 
