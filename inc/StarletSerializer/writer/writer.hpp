@@ -5,21 +5,26 @@
 #include <string>
 #include <fstream>
 
-class Scene;
-struct Model;
+namespace Starlet {
+	namespace Scene {
+		struct Model;
 
-struct TransformComponent;
-struct ColourComponent;
+		struct TransformComponent;
+		struct ColourComponent;
+	}
 
-class Writer {
-public:
-	bool writeScene(const Scene& scene);
+	namespace Serializer {
+		class Writer {
+		public:
+			bool writeScene(const Scene::Scene& scene);
 
-private:
-	bool writeCameras(std::ostream& file, const Scene& scene);
-	bool writeModels(std::ostream& file, const Scene& scene);
-	bool writeLights(std::ostream& file, const Scene& scene);
+		private:
+			bool writeCameras(std::ostream& file, const Scene::Scene& scene);
+			bool writeModels(std::ostream& file, const Scene::Scene& scene);
+			bool writeLights(std::ostream& file, const Scene::Scene& scene);
 
-	bool writeTransform(std::ostream& file, const TransformComponent& transform, bool includeSize = true);
-	bool writeColourMode(std::ostream& file, const Model& model, const ColourComponent& colour);
-};
+			bool writeTransform(std::ostream& file, const Scene::TransformComponent& transform, bool includeSize = true);
+			bool writeColourMode(std::ostream& file, const Scene::Model& model, const Scene::ColourComponent& colour);
+		};
+	}
+}

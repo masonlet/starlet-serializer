@@ -3,7 +3,9 @@
 
 #include "StarletScene/component/velocity.hpp"
 
-bool SceneParser::parseVelocity(const unsigned char*& p, VelocityComponent& velocity) {
-	PARSE_OR(return false, parseVec3f, velocity.velocity, "velocity");
-	return true;
+namespace Starlet::Serializer {
+	bool SceneParser::parseVelocity(const unsigned char*& p, Scene::VelocityComponent& velocity) {
+		PARSE_OR(return false, parseVec3f, velocity.velocity, "velocity");
+		return true;
+	}
 }
