@@ -1,13 +1,10 @@
 #include "StarletSerializer/parser/plyParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-#include "StarletGraphics/resource/meshCPU.hpp"
-#include "StarletMath/constants.hpp"
-
 #include <string>
 
 namespace Starlet::Serializer {
-	bool PlyParser::parse(const std::string& path, Graphics::MeshCPU& drawInfo) {
+	bool PlyParser::parse(const std::string& path, PlyData& out) {
 		std::vector<unsigned char> file;
 		if (!loadBinaryFile(file, path))
 			return false;
@@ -17,25 +14,25 @@ namespace Starlet::Serializer {
 		const unsigned char* p = file.data();
 		std::string errorMsg;
 		while (true) {
-			if (!parseHeaderLine(p, drawInfo.numVertices, drawInfo.numTriangles, drawInfo.hasNormals, drawInfo.hasColours, drawInfo.hasTexCoords)) {
+			if (!parseHeaderLine(p, out.numVertices, out.numTriangles, out.hasNormals, out.hasColours, out.hasTexCoords)) {
 				errorMsg = "header or missing 'end_header'";
 				break;
 			}
 
-			if (drawInfo.numVertices == 0 || drawInfo.numTriangles == 0) {
+			if (out.numVertices == 0 || out.numTriangles == 0) {
 				errorMsg = "header, no vertices/triangles declared";
 				break;
 			}
 
-			drawInfo.vertices.assign(drawInfo.numVertices, Math::Vertex{});
-			if (!parseVertices(p, drawInfo)) {
+			out.vertices.assign(out.numVertices, Math::Vertex{});
+			if (!parseVertices(p, out)) {
 				errorMsg = "vertex data";
 				break;
 			}
 
-			drawInfo.numIndices = drawInfo.numTriangles * 3;
-			drawInfo.indices.assign(drawInfo.numIndices, 0u);
-			if (!parseIndices(p, drawInfo)) {
+			out.numIndices = out.numTriangles * 3;
+			out.indices.assign(out.numIndices, 0u);
+			if (!parseIndices(p, out)) {
 				errorMsg = "face data";
 				break;
 			}
@@ -43,9 +40,9 @@ namespace Starlet::Serializer {
 			return true;
 		}
 
-		drawInfo.indices.clear();
-		drawInfo.vertices.clear();
-		drawInfo.numVertices = drawInfo.numIndices = drawInfo.numTriangles = 0;
+		out.indices.clear();
+		out.vertices.clear();
+		out.numVertices = out.numIndices = out.numTriangles = 0;
 		return error("PlyParser", "LoadModelFromFile", ("Failed to parse " + errorMsg + '\n').c_str());
 	}
 
@@ -142,14 +139,14 @@ namespace Starlet::Serializer {
 		return true;
 	}
 
-	bool PlyParser::parseVertices(const unsigned char*& p, Graphics::MeshCPU& drawInfo) {
+	bool PlyParser::parseVertices(const unsigned char*& p, PlyData& out) {
 		if (!p) return error("PlyParser", "parseVertices", "Input pointer is null\n");
-		if (!drawInfo.numVertices) return error("PlyParser", "parseVertices", "No vertices declared in header\n");
+		if (!out.numVertices) return error("PlyParser", "parseVertices", "No vertices declared in header\n");
 
 		float minY = FLT_MAX, maxY = -FLT_MAX;
 		unsigned int i = 0;
-		while (i < drawInfo.numVertices && *p) {
-			Math::Vertex& v = drawInfo.vertices[i];
+		while (i < out.numVertices && *p) {
+			Math::Vertex& v = out.vertices[i];
 			const unsigned char* nextLine = skipToNextLine(p);
 			const unsigned char* lineEnd = trimEOL(p, nextLine);
 
@@ -172,7 +169,7 @@ namespace Starlet::Serializer {
 				continue;
 			}
 
-			if (drawInfo.hasNormals) {
+			if (out.hasNormals) {
 				while (valid) {
 					PARSE_OR(valid = false, parseFloat, v.norm.x, "Failed to parse normal X");
 					PARSE_OR(valid = false, parseFloat, v.norm.y, "Failed to parse normal Y");
@@ -186,7 +183,7 @@ namespace Starlet::Serializer {
 				}
 			}
 
-			if (drawInfo.hasColours) {
+			if (out.hasColours) {
 				if (*p != '\0') {
 					Math::Vec3 colour = { 1.0f, 1.0f, 1.0f };
 					const unsigned char* original = p;
@@ -202,7 +199,7 @@ namespace Starlet::Serializer {
 						colour.y >= 0.0f && colour.y <= 1.0f &&
 						colour.z >= 0.0f && colour.z <= 1.0f) {
 						v.col = Math::Vec4{ colour.x, colour.y, colour.z, 1.0f };
-						drawInfo.hasColours = true;
+						out.hasColours = true;
 					}
 					else {
 						p = original;
@@ -229,7 +226,7 @@ namespace Starlet::Serializer {
 				}
 			}
 
-			if (drawInfo.hasTexCoords) {
+			if (out.hasTexCoords) {
 				while (valid) {
 					PARSE_OR(valid = false, parseFloat, v.texCoord.x, "Failed to parse texcoord U");
 					PARSE_OR(valid = false, parseFloat, v.texCoord.y, "Failed to parse texcoord V");
@@ -244,16 +241,16 @@ namespace Starlet::Serializer {
 			p = nextLine;
 		}
 
-		drawInfo.minY = minY;
-		drawInfo.maxY = maxY;
+		out.minY = minY;
+		out.maxY = maxY;
 		return true;
 	}
-	bool PlyParser::parseIndices(const unsigned char*& p, Graphics::MeshCPU& drawInfo) {
+	bool PlyParser::parseIndices(const unsigned char*& p, PlyData& out) {
 		if (!p) return error("PlyParser", "parseIndices", "Input pointer is null");
-		if (drawInfo.indices.empty() || drawInfo.numIndices == 0) return error("PlyParser", "parseIndices", "Index buffer not allocated");
+		if (out.indices.empty() || out.numIndices == 0) return error("PlyParser", "parseIndices", "Index buffer not allocated");
 
 		unsigned int triangleIndex = 0;
-		while (triangleIndex < drawInfo.numTriangles && *p) {
+		while (triangleIndex < out.numTriangles && *p) {
 			const unsigned char* nextLine = skipToNextLine(p);
 			const unsigned char* lineEnd = trimEOL(p, nextLine);
 
@@ -284,9 +281,9 @@ namespace Starlet::Serializer {
 
 			if (valid) {
 				unsigned int base = triangleIndex * 3;
-				drawInfo.indices[base + 0] = i0;
-				drawInfo.indices[base + 1] = i1;
-				drawInfo.indices[base + 2] = i2;
+				out.indices[base + 0] = i0;
+				out.indices[base + 1] = i1;
+				out.indices[base + 2] = i2;
 				++triangleIndex;
 			}
 
