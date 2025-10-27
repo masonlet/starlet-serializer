@@ -1,13 +1,12 @@
 #include "StarletSerializer/parser/bmpParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-#include "StarletGraphics/resource/textureCPU.hpp"
-
 #include <cstdio>
 
 namespace Starlet::Serializer {
-	bool BmpParser::parse(const std::string& path, Graphics::TextureCPU& out) {
-		out.freePixels();
+	bool BmpParser::parse(const std::string& path, BmpData& out) {
+		out.pixels.clear(); 
+		out.pixelSize = out.byteSize = 0;
 		out.width = out.height = 0;
 
 		std::vector<unsigned char> file;
