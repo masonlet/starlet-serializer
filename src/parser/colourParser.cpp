@@ -1,9 +1,6 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
-#include "StarletScene/component/colour.hpp"
-#include "StarletMath/vec4.hpp"
-
 namespace Starlet::Serializer {
 	bool SceneParser::parseColour(const unsigned char*& p, Math::Vec4<float>& colourOut) {
 		const unsigned char* original = p;
