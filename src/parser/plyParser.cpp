@@ -1,6 +1,8 @@
 #include "StarletSerializer/parser/plyParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/plyData.hpp"
+
 namespace Starlet::Serializer {
 	bool PlyParser::parse(const std::string& path, PlyData& out) {
 		std::vector<unsigned char> file;

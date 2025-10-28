@@ -1,6 +1,8 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/lightData.hpp"
+
 namespace Starlet::Serializer {
 	bool SceneParser::parseLightType(const unsigned char*& p, LightType& type) {
 		p = skipWhitespace(p);

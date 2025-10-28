@@ -1,5 +1,7 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 
+#include "StarletSerializer/data/primitiveData.hpp"
+
 namespace Starlet::Serializer {
   template<PrimitiveType T>
   bool SceneParser::parsePrimitive(const unsigned char*& p, PrimitiveData& out) {

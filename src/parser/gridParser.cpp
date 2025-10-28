@@ -1,5 +1,7 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 
+#include "StarletSerializer/data/gridData.hpp"
+
 namespace Starlet::Serializer {
   template <GridType T>
   bool SceneParser::parseGrid(const unsigned char*& p, GridData& grid) {

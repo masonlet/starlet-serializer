@@ -1,30 +1,40 @@
 #pragma once
 
-#include "StarletScene/scene.hpp"
-
 #include <string>
+#include <vector>
 #include <fstream>
 
-namespace Starlet {
-	namespace Scene {
-		struct Model;
+#ifndef WRITE_OR 
+#define WRITE_OR(onFail, writer, errorMsg) \
+do { \
+  if (!(writer(file, data))) { \
+      if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Writer ERROR]: Failed to write %s\n", errorMsg); \
+      onFail; \
+	} \
+} while(0)
+#endif
 
-		struct TransformComponent;
-		struct ColourComponent;
-	}
+namespace Starlet::Serializer {
+	struct SceneData;
+	struct TransformData;
+	struct ModelData;
 
-	namespace Serializer {
-		class Writer {
-		public:
-			bool writeScene(const Scene::Scene& scene);
+	class Writer {
+	public:
+		bool writeScene(const SceneData& data, const std::string& path);
 
-		private:
-			bool writeCameras(std::ostream& file, const Scene::Scene& scene);
-			bool writeModels(std::ostream& file, const Scene::Scene& scene);
-			bool writeLights(std::ostream& file, const Scene::Scene& scene);
+	private:
+		bool writeCameras(std::ostream& file, const SceneData& data);
+		bool writeModels(std::ostream& file, const SceneData& data);
+		bool writeLights(std::ostream& file, const SceneData& data);
+		bool writePrimitives(std::ostream& file, const SceneData& data);
+		bool writeTextures(std::ostream& file, const SceneData& data);
+		bool writeTextureConnections(std::ostream& file, const SceneData& data);
+		bool writeGrids(std::ostream& file, const SceneData& data);
+		bool writeVelocities(std::ostream& file, const SceneData& data);
+		bool writeAmbient(std::ostream& file, const SceneData& data);
 
-			bool writeTransform(std::ostream& file, const Scene::TransformComponent& transform, bool includeSize = true);
-			bool writeColourMode(std::ostream& file, const Scene::Model& model, const Scene::ColourComponent& colour);
-		};
-	}
+		bool writeTransform(std::ostream& file, const TransformData& transform, bool includeSize = true);
+		bool writeColourMode(std::ostream& file, const ModelData& model);
+	};
 }

@@ -1,5 +1,7 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 
+#include "StarletSerializer/data/cameraData.hpp"
+
 namespace Starlet::Serializer {
   bool SceneParser::parseCamera(const unsigned char*& p, CameraData& camera) {
     PARSE_OR(return false, parseBool, camera.enabled, "camera enabled");

@@ -1,5 +1,7 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 
+#include "StarletSerializer/data/modelData.hpp"
+
 namespace Starlet::Serializer {
   bool SceneParser::parseModel(const unsigned char*& p, ModelData& model) {
     PARSE_OR(return false, parseBool, model.isVisible, "model enabled");

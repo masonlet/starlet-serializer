@@ -1,6 +1,8 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/sceneData.hpp"
+
 namespace Starlet::Serializer {
 	bool SceneParser::parse(const std::string& path, SceneData& scene) {
 		std::string src{};

@@ -1,6 +1,8 @@
 #include "StarletSerializer/parser/bmpParser.hpp"
 #include "StarletSerializer/utils/log.hpp"
 
+#include "StarletSerializer/data/bmpData.hpp"
+
 #include <cstdio>
 
 namespace Starlet::Serializer {
