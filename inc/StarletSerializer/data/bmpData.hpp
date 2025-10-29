@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace Starlet::Serializer {
 	struct BmpData {
 		int32_t width{ 0 }, height{ 0 };
