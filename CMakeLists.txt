@@ -4,10 +4,20 @@ set(SER_NAME StarletSerializer)
 set(SER_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(SER_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
+include(FetchContent)
 if(NOT TARGET StarletMath)
-  include(FetchContent)
-  FetchContent_Declare(StarletMath GIT_REPOSITORY https://github.com/masonlet/starletmath.git GIT_TAG main)
+  FetchContent_Declare(StarletMath 
+    GIT_REPOSITORY https://github.com/masonlet/starletmath.git 
+    GIT_TAG main
+  )
   FetchContent_MakeAvailable(StarletMath)
+endif()
+if(NOT TARGET StarletLogger)
+  FetchContent_Declare(StarletLogger
+    GIT_REPOSITORY https://github.com/masonlet/starletlogger.git 
+    GIT_TAG main
+  )
+  FetchContent_MakeAvailable(StarletLogger)
 endif()
 
 if(NOT TARGET ${SER_NAME})
@@ -21,5 +31,5 @@ if(NOT TARGET ${SER_NAME})
 
   target_sources(${SER_NAME} PRIVATE ${SER_SRC} ${SER_HEADERS})
   target_include_directories(${SER_NAME} PUBLIC $<BUILD_INTERFACE:${SER_INC_DIR}> $<INSTALL_INTERFACE:include>)
-  target_link_libraries(${SER_NAME} PUBLIC StarletMath)
+  target_link_libraries(${SER_NAME} PUBLIC StarletMath StarletLogger)
 endif()

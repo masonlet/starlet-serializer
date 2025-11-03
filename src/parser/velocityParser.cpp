@@ -1,6 +1,4 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
-#include "StarletSerializer/utils/log.hpp"
-
 #include "StarletSerializer/data/velocityData.hpp"
 
 namespace Starlet::Serializer {

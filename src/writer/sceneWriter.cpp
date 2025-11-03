@@ -1,5 +1,5 @@
 #include "StarletSerializer/writer/writer.hpp"
-#include "StarletSerializer/utils/log.hpp"
+#include "StarletLogger/logger.hpp"
 
 #include "StarletSerializer/data/sceneData.hpp"
 #include "StarletSerializer/data/modelData.hpp"
@@ -18,7 +18,7 @@ namespace Starlet::Serializer {
   bool Writer::writeScene(const SceneData& data, const std::string& path) {
     std::ofstream file(path);
     if (!file.is_open())
-      return error("Writer", "writeScene", "Failed to open file for saving: " + path);
+      return Logger::error("Writer", "writeScene", "Failed to open file for saving: " + path);
 
     file << std::fixed << std::setprecision(3);
 

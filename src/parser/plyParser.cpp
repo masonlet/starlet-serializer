@@ -1,7 +1,7 @@
 #include "StarletSerializer/parser/plyParser.hpp"
-#include "StarletSerializer/utils/log.hpp"
-
 #include "StarletSerializer/data/plyData.hpp"
+
+#include "StarletLogger/logger.hpp"
 
 namespace Starlet::Serializer {
 	bool PlyParser::parse(const std::string& path, PlyData& out) {
@@ -9,7 +9,7 @@ namespace Starlet::Serializer {
 		if (!loadBinaryFile(file, path))
 			return false;
 
-		if (file.empty()) return error("PlyParser", "parsePlyMesh", "Input pointer is null\n");
+		if (file.empty()) return Logger::error("PlyParser", "parsePlyMesh", "Input pointer is null\n");
 
 		const unsigned char* p = file.data();
 		std::string errorMsg;
@@ -43,11 +43,11 @@ namespace Starlet::Serializer {
 		out.indices.clear();
 		out.vertices.clear();
 		out.numVertices = out.numIndices = out.numTriangles = 0;
-		return error("PlyParser", "LoadModelFromFile", ("Failed to parse " + errorMsg + '\n').c_str());
+		return Logger::error("PlyParser", "LoadModelFromFile", ("Failed to parse " + errorMsg + '\n').c_str());
 	}
 
 	bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVerticesOut, unsigned int& numTrianglesOut, bool& hasNormalsOut, bool& hasColoursOut, bool& hasTexCoordsOut) {
-		if (!p) return error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
+		if (!p) return Logger::error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
 		p = skipWhitespace(p);
 
 		bool hasNx = false, hasNy = false, hasNz = false;
@@ -80,16 +80,16 @@ namespace Starlet::Serializer {
 			else if (!(strncmp((const char*)p, "ply", 3) == 0)
 				&& !(strncmp((const char*)p, "format", 6) == 0)
 				&& !(strncmp((const char*)p, "comment", 7) == 0))
-				debugLog("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
+				Logger::debugLog("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
 
 			p = nextLine;
 		}
 
-		return error("plyParser", "parsePlyHeader", "Failed, end of buffer reached");
+		return Logger::error("plyParser", "parsePlyHeader", "Failed, end of buffer reached");
 	}
 
 	bool PlyParser::parseElementLine(const unsigned char*& p, unsigned int& verticesOut, unsigned int& trianglesOut) {
-		if (!p) return error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
+		if (!p) return Logger::error("PlyParser", "parsePlyHeader", "Input pointer is null\n");
 
 		p = skipWhitespace(p += 7);
 		if (strncmp((const char*)p, "vertex", 6) == 0 && (p[6] == ' ' || p[6] == '\t')) {
@@ -103,12 +103,12 @@ namespace Starlet::Serializer {
 		return false;
 	}
 	bool PlyParser::parsePropertyLine(const unsigned char*& p, bool& hasNx, bool& hasNy, bool& hasNz, bool& hasR, bool& hasG, bool& hasB, bool& hasU, bool& hasV) {
-		if (!p) return error("PlyParser", "parsePlyPropertyLine", "Input pointer is null\n");
+		if (!p) return Logger::error("PlyParser", "parsePlyPropertyLine", "Input pointer is null\n");
 		p = skipWhitespace(p += 8);
 
 		char type[32]{};
 		if (!parseToken(p, (unsigned char*)type, sizeof(type)))
-			return error("PlyParser", "parsePlyPropertyLine", "Failed to parse property type :" + std::string(type));
+			return Logger::error("PlyParser", "parsePlyPropertyLine", "Failed to parse property type :" + std::string(type));
 
 		if (strcmp(type, "list") == 0) {
 			/*
@@ -119,14 +119,14 @@ namespace Starlet::Serializer {
 			char property[3][32]{};
 			for (int i = 0; i < 3; ++i)
 				if (!parseToken(p, reinterpret_cast<unsigned char*>(property[i]), sizeof(property[i])))
-					return error("PlyParser", "parsePlyPropertyLine", "Failed to parse property list type, number: " + std::to_string(i));
+					return Logger::error("PlyParser", "parsePlyPropertyLine", "Failed to parse property list type, number: " + std::to_string(i));
 
 			return true;
 		}
 
 		char propertyName[32]{};
 		if (!parseToken(p, (unsigned char*)propertyName, sizeof(propertyName)))
-			return error("PlyParser", "parsePlyPropertyLine", "Failed to parse property name :" + std::string(propertyName));
+			return Logger::error("PlyParser", "parsePlyPropertyLine", "Failed to parse property name :" + std::string(propertyName));
 
 		if (strcmp(propertyName, "nx") == 0 || strcmp(propertyName, "normal_x") == 0) hasNx = true;
 		else if (strcmp(propertyName, "ny") == 0 || strcmp(propertyName, "normal_y") == 0) hasNy = true;
@@ -140,8 +140,8 @@ namespace Starlet::Serializer {
 	}
 
 	bool PlyParser::parseVertices(const unsigned char*& p, PlyData& out) {
-		if (!p) return error("PlyParser", "parseVertices", "Input pointer is null\n");
-		if (!out.numVertices) return error("PlyParser", "parseVertices", "No vertices declared in header\n");
+		if (!p) return Logger::error("PlyParser", "parseVertices", "Input pointer is null\n");
+		if (!out.numVertices) return Logger::error("PlyParser", "parseVertices", "No vertices declared in header\n");
 
 		float minY = FLT_MAX, maxY = -FLT_MAX;
 		unsigned int i = 0;
@@ -246,8 +246,8 @@ namespace Starlet::Serializer {
 		return true;
 	}
 	bool PlyParser::parseIndices(const unsigned char*& p, PlyData& out) {
-		if (!p) return error("PlyParser", "parseIndices", "Input pointer is null");
-		if (out.indices.empty() || out.numIndices == 0) return error("PlyParser", "parseIndices", "Index buffer not allocated");
+		if (!p) return Logger::error("PlyParser", "parseIndices", "Input pointer is null");
+		if (out.indices.empty() || out.numIndices == 0) return Logger::error("PlyParser", "parseIndices", "Index buffer not allocated");
 
 		unsigned int triangleIndex = 0;
 		while (triangleIndex < out.numTriangles && *p) {

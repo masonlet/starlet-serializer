@@ -1,5 +1,4 @@
 #include "StarletSerializer/parser/sceneParser.hpp"
-
 #include "StarletSerializer/data/primitiveData.hpp"
 
 namespace Starlet::Serializer {
