@@ -26,37 +26,43 @@ do { \
 #endif
 
 namespace Starlet {
-	namespace Math {
-		template <typename T> struct Vec2;
-		template <typename T> struct Vec3;
-		template <typename T> struct Vec4;
-	}
 
-	namespace Serializer {
-		class Parser {
-		public:
-			const size_t MAX_SIZE = static_cast<size_t>(200 * 1024) * 1024; //200MB Limit
+namespace Math {
 
-			bool loadFile(std::string& out, const std::string& path);
-			bool loadBinaryFile(std::vector<unsigned char>& dataOut, const std::string& path);
+template <typename T> struct Vec2;
+template <typename T> struct Vec3;
+template <typename T> struct Vec4;
 
-			bool parseBool(const unsigned char*& p, bool& out);
-			bool parseUInt(const unsigned char*& p, unsigned int& out);
-			bool parseFloat(const unsigned char*& p, float& out);
-			bool parseToken(const unsigned char*& p, unsigned char* out, const size_t maxLength);
+}
 
-			bool parseVec2f(const unsigned char*& p, Math::Vec2<float>& out);
-			bool parseVec3f(const unsigned char*& p, Math::Vec3<float>& out);
-			bool parseVec4f(const unsigned char*& p, Math::Vec4<float>& out);
+namespace Serializer {
 
-			const unsigned char* skipToNextLine(const unsigned char* p);
-			const unsigned char* skipWhitespace(const unsigned char* p, bool skipComma = true);
-			const unsigned char* trimEOL(const unsigned char* p, const unsigned char* end);
+class Parser {
+public:
+	const size_t MAX_SIZE = static_cast<size_t>(200 * 1024) * 1024; //200MB Limit
 
-		private:
-			bool getFileSize(FILE* file, size_t& sizeOut) const;
+	bool loadFile(std::string& out, const std::string& path);
+	bool loadBinaryFile(std::vector<unsigned char>& dataOut, const std::string& path);
 
-			bool isDelim(unsigned char c, bool comma = true);
-		};
-	}
+	bool parseBool(const unsigned char*& p, bool& out);
+	bool parseUInt(const unsigned char*& p, unsigned int& out);
+	bool parseFloat(const unsigned char*& p, float& out);
+	bool parseToken(const unsigned char*& p, unsigned char* out, const size_t maxLength);
+
+	bool parseVec2f(const unsigned char*& p, Math::Vec2<float>& out);
+	bool parseVec3f(const unsigned char*& p, Math::Vec3<float>& out);
+	bool parseVec4f(const unsigned char*& p, Math::Vec4<float>& out);
+
+	const unsigned char* skipToNextLine(const unsigned char* p);
+	const unsigned char* skipWhitespace(const unsigned char* p, bool skipComma = true);
+	const unsigned char* trimEOL(const unsigned char* p, const unsigned char* end);
+
+private:
+	bool getFileSize(FILE* file, size_t& sizeOut) const;
+
+	bool isDelim(unsigned char c, bool comma = true);
+};
+
+}
+
 }
