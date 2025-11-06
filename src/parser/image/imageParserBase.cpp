@@ -46,6 +46,18 @@ uint16_t ImageParserBase::readUint16(const unsigned char* p, size_t offset) cons
 		  | (static_cast<uint16_t>(p[offset + 1]) << 8);
 }
 
+bool ImageParserBase::allocatePixelBuffer(ImageData& out, uint32_t width, uint32_t height) const {
+	out.width = width;
+	out.height = height;
+	out.pixelSize = 3;
+	out.byteSize = static_cast<size_t>(width) * static_cast<size_t>(height) * out.pixelSize;
+	out.pixels.resize(out.byteSize);
+
+	if (out.pixels.empty())
+		return Logger::error("ImageParserBase", "allocatePixelBuffer", "Failed to allocate memory for image pixels");
+
+	return true;
+}
 void ImageParserBase::convertBgrToRgb(const unsigned char* src, unsigned char* dst, uint32_t width) const {
 	for (uint32_t col = 0; col < width; ++col) {
 		const size_t offset = static_cast<size_t>(col) * 3;

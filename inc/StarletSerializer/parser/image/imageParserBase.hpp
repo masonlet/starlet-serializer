@@ -18,6 +18,7 @@ protected:
 
 	bool validateDimensions(uint32_t width, uint32_t height) const;
 
+	bool allocatePixelBuffer(ImageData& out, uint32_t width, uint32_t height) const;
 	void convertBgrToRgb(const unsigned char* src, unsigned char* dst, uint32_t width) const;
 
 	uint32_t readUint32(const unsigned char* p, size_t offset) const;

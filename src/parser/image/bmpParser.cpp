@@ -25,7 +25,7 @@ bool BmpParser::parse(const std::string& path, ImageData& out) {
 	int32_t  height{ 0 };
 	uint32_t dataOffset{ 0 };
 
-	if (!parseBmpHeader(p, file->size(), width, height, dataOffset))
+	if (!parseHeader(p, file->size(), width, height, dataOffset))
 		return false;
 
 	const bool bottomUp = (height > 0);
@@ -40,7 +40,7 @@ bool BmpParser::parse(const std::string& path, ImageData& out) {
 	return true;
 }
 
-bool BmpParser::parseBmpHeader(const unsigned char* p, size_t fileSize, uint32_t& width, int32_t& height, uint32_t& dataOffset) {
+bool BmpParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& width, int32_t& height, uint32_t& dataOffset) {
 	if (!validateFileSignature(p, fileSize)) return false;
 
 	dataOffset = readUint32(p, 10);
@@ -75,17 +75,6 @@ bool BmpParser::validateFileSignature(const unsigned char* p, size_t fileSize) c
 	if (p[0] != 'B' || p[1] != 'M') 
 		return Logger::error("BmpParser", "validateFileSignature", "Bad signature (not BM)");
 
-	return true;
-}
-
-bool BmpParser::allocatePixelBuffer(ImageData& out, uint32_t width, uint32_t height) const {
-	out.width = width;
-	out.height = height;
-	out.pixelSize = 3;
-	out.byteSize = static_cast<size_t>(width) * static_cast<size_t>(height) * out.pixelSize;
-	out.pixels.resize(out.byteSize);
-
-	if (out.pixels.empty()) return Logger::error("BmpParser", "allocatePixelBuffer", "Failed to allocate memory for pixel data");
 	return true;
 }
 

@@ -24,7 +24,7 @@ bool TgaParser::parse(const std::string& path, ImageData& out) {
 	bool topDown{ false };
 	uint32_t dataOffset{ 0 };
 
-	if (!parseTgaHeader(p, file->size(), width, height, bpp, topDown, dataOffset))
+	if (!parseHeader(p, file->size(), width, height, bpp, topDown, dataOffset))
 		return false;
 
 	if (!allocatePixelBuffer(out, width, height))
@@ -36,7 +36,7 @@ bool TgaParser::parse(const std::string& path, ImageData& out) {
 	return true;
 }
 
-bool TgaParser::parseTgaHeader(const unsigned char* p, size_t fileSize, uint32_t& width, uint32_t& height, uint8_t& bpp, bool& topDown, uint32_t& dataOffset) {
+bool TgaParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& width, uint32_t& height, uint8_t& bpp, bool& topDown, uint32_t& dataOffset) {
 	if (!validateFileSignature(p, fileSize)) return false;
 
 	const uint8_t idLength      = p[0];
@@ -73,18 +73,6 @@ bool TgaParser::validateFileSignature(const unsigned char* p, size_t fileSize) c
 
 	if (fileSize < TGA_HEADER_SIZE)
 		return Logger::error("TgaParser", "validateFileSignature", "File too small: " + std::to_string(fileSize) + " bytes");
-
-	return true;
-}
-bool TgaParser::allocatePixelBuffer(ImageData& out, uint32_t width, uint32_t height) const {
-	out.width = width;
-	out.height = height;
-	out.pixelSize = 3;
-	out.byteSize = static_cast<size_t>(width) * static_cast<size_t>(height) * out.pixelSize;
-	out.pixels.resize(out.byteSize);
-
-	if (out.pixels.empty())
-		return Logger::error("TgaParser", "allocatePixelBuffer", "Failed to allocate memory for image pixels");
 
 	return true;
 }
