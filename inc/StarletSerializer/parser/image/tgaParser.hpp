@@ -1,10 +1,10 @@
 #pragma once
 
-#include "StarletSerializer/parser/imageParser.hpp"
+#include "StarletSerializer/parser/image/imageParserBase.hpp"
 
 namespace Starlet::Serializer {
 
-class TgaParser : public ImageParser {
+class TgaParser : public ImageParserBase {
 public:
 	bool parse(const std::string& path, ImageData& out) override;
 
