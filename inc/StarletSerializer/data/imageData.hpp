@@ -4,7 +4,7 @@
 
 namespace Starlet::Serializer {
 
-struct BmpData {
+struct ImageData {
 	int32_t width{ 0 }, height{ 0 };
 	std::vector<uint8_t> pixels;
 	uint8_t  pixelSize{ 0 };
