@@ -4,8 +4,10 @@
 #include <vector>
 #include <fstream>
 
-#ifndef WRITE_OR 
-#define WRITE_OR(onFail, writer, errorMsg) \
+namespace Starlet::Serializer {
+
+#ifndef STARLET_WRITE_OR 
+#define STARLET_WRITE_OR(onFail, writer, errorMsg) \
 do { \
   if (!(writer(file, data))) { \
       if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Writer ERROR]: Failed to write %s\n", errorMsg); \
@@ -13,8 +15,6 @@ do { \
 	} \
 } while(0)
 #endif
-
-namespace Starlet::Serializer {
 
 struct SceneData;
 struct TransformData;

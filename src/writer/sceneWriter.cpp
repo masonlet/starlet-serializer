@@ -23,15 +23,15 @@ bool Writer::writeScene(const SceneData& data, const std::string& path) {
 
   file << std::fixed << std::setprecision(3);
 
-  WRITE_OR(return false, writeCameras, "cameras");
-  WRITE_OR(return false, writeAmbient, "ambient");
-  WRITE_OR(return false, writeTextures, "textures");
-  WRITE_OR(return false, writeModels, "models");
-  WRITE_OR(return false, writeTextureConnections, "texture connections");
-  WRITE_OR(return false, writeLights, "lights");
-  WRITE_OR(return false, writePrimitives, "primitives");
-  WRITE_OR(return false, writeGrids, "grids");
-  WRITE_OR(return false, writeVelocities, "velocity");
+  STARLET_WRITE_OR(return false, writeCameras, "cameras");
+  STARLET_WRITE_OR(return false, writeAmbient, "ambient");
+  STARLET_WRITE_OR(return false, writeTextures, "textures");
+  STARLET_WRITE_OR(return false, writeModels, "models");
+  STARLET_WRITE_OR(return false, writeTextureConnections, "texture connections");
+  STARLET_WRITE_OR(return false, writeLights, "lights");
+  STARLET_WRITE_OR(return false, writePrimitives, "primitives");
+  STARLET_WRITE_OR(return false, writeGrids, "grids");
+  STARLET_WRITE_OR(return false, writeVelocities, "velocity");
 
   return true;
 }

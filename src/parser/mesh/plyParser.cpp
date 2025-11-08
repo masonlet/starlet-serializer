@@ -160,9 +160,9 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 
 		bool valid = true;
 		while (valid) {
-			PARSE_OR(valid = false, parseFloat, v.pos.x, "Failed to parse position X");
-			PARSE_OR(valid = false, parseFloat, v.pos.y, "Failed to parse position Y");
-			PARSE_OR(valid = false, parseFloat, v.pos.z, "Failed to parse position Z");
+			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.x, "Failed to parse position X");
+			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.y, "Failed to parse position Y");
+			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.z, "Failed to parse position Z");
 			break;
 		}
 		if (!valid) {
@@ -172,9 +172,9 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 
 		if (out.hasNormals) {
 			while (valid) {
-				PARSE_OR(valid = false, parseFloat, v.norm.x, "Failed to parse normal X");
-				PARSE_OR(valid = false, parseFloat, v.norm.y, "Failed to parse normal Y");
-				PARSE_OR(valid = false, parseFloat, v.norm.z, "Failed to parse normal Z");
+				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.x, "Failed to parse normal X");
+				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.y, "Failed to parse normal Y");
+				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.z, "Failed to parse normal Z");
 				break;
 			}
 
@@ -189,9 +189,9 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 				Math::Vec3 colour = { 1.0f, 1.0f, 1.0f };
 				const unsigned char* original = p;
 				while (valid) {
-					PARSE_OR(valid = false, parseFloat, colour.r, "Failed to parse float colour R");
-					PARSE_OR(valid = false, parseFloat, colour.g, "Failed to parse float colour G");
-					PARSE_OR(valid = false, parseFloat, colour.b, "Failed to parse float colour B");
+					STARLET_PARSE_OR(valid = false, parseFloat, colour.r, "Failed to parse float colour R");
+					STARLET_PARSE_OR(valid = false, parseFloat, colour.g, "Failed to parse float colour G");
+					STARLET_PARSE_OR(valid = false, parseFloat, colour.b, "Failed to parse float colour B");
 					break;
 				}
 
@@ -208,9 +208,9 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 
 					valid = true;
 					while (valid) {
-						PARSE_OR(valid = false, parseUInt, ri, "");
-						PARSE_OR(valid = false, parseUInt, gi, "");
-						PARSE_OR(valid = false, parseUInt, bi, "");
+						STARLET_PARSE_OR(valid = false, parseUInt, ri, "");
+						STARLET_PARSE_OR(valid = false, parseUInt, gi, "");
+						STARLET_PARSE_OR(valid = false, parseUInt, bi, "");
 						break;
 					}
 					if (!parseUInt(p, ai)) ai = 255;
@@ -229,8 +229,8 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 
 		if (out.hasTexCoords) {
 			while (valid) {
-				PARSE_OR(valid = false, parseFloat, v.texCoord.x, "Failed to parse texcoord U");
-				PARSE_OR(valid = false, parseFloat, v.texCoord.y, "Failed to parse texcoord V");
+				STARLET_PARSE_OR(valid = false, parseFloat, v.texCoord.x, "Failed to parse texcoord U");
+				STARLET_PARSE_OR(valid = false, parseFloat, v.texCoord.y, "Failed to parse texcoord V");
 				break;
 			}
 		}
@@ -274,9 +274,9 @@ bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 		unsigned int i0{ 0 }, i1{ 0 }, i2{ 0 };
 		bool valid = true;
 		while (valid) {
-			PARSE_OR(valid = false, parseUInt, i0, "Failed to parse indice 1");
-			PARSE_OR(valid = false, parseUInt, i1, "Failed to parse indice 2");
-			PARSE_OR(valid = false, parseUInt, i2, "Failed to parse indice 3");
+			STARLET_PARSE_OR(valid = false, parseUInt, i0, "Failed to parse indice 1");
+			STARLET_PARSE_OR(valid = false, parseUInt, i1, "Failed to parse indice 2");
+			STARLET_PARSE_OR(valid = false, parseUInt, i2, "Failed to parse indice 3");
 			break;
 		}
 

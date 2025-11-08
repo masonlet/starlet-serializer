@@ -6,10 +6,10 @@ namespace Starlet::Serializer {
 template<PrimitiveType T>
 bool SceneParser::parsePrimitive(const unsigned char*& p, PrimitiveData& out) {
   out.type = T;
-  PARSE_STRING_OR(return false, p, out.name, 64, "primitive name");
-  PARSE_OR(return false, parseVec3f, out.transform.pos, "primitive position");
-  PARSE_OR(return false, parseVec3f, out.transform.rot, "primitive rotation");
-  PARSE_OR(return false, parseVec3f, out.transform.size, "triangle size");
+  STARLET_PARSE_STRING_OR(return false, p, out.name, 64, "primitive name");
+  STARLET_PARSE_OR(return false, parseVec3f, out.transform.pos, "primitive position");
+  STARLET_PARSE_OR(return false, parseVec3f, out.transform.rot, "primitive rotation");
+  STARLET_PARSE_OR(return false, parseVec3f, out.transform.size, "triangle size");
   return parseColour(p, out.colour.colour);
 }
 

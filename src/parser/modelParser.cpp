@@ -4,16 +4,16 @@
 namespace Starlet::Serializer {
 
 bool SceneParser::parseModel(const unsigned char*& p, ModelData& model) {
-  PARSE_OR(return false, parseBool, model.isVisible, "model enabled");
-  PARSE_OR(return false, parseBool, model.isLighted, "model lighting");
-  PARSE_STRING_OR(return false, p, model.name, 64, "model name");
-  PARSE_STRING_OR(return false, p, model.meshPath, 128, "model path");
-  PARSE_OR(return false, parseVec3f, model.transform.pos, "model position");
-  PARSE_OR(return false, parseVec3f, model.transform.rot, "model rotation");
-  PARSE_OR(return false, parseVec3f, model.transform.size, "model scale");
+  STARLET_PARSE_OR(return false, parseBool, model.isVisible, "model enabled");
+  STARLET_PARSE_OR(return false, parseBool, model.isLighted, "model lighting");
+  STARLET_PARSE_STRING_OR(return false, p, model.name, 64, "model name");
+  STARLET_PARSE_STRING_OR(return false, p, model.meshPath, 128, "model path");
+  STARLET_PARSE_OR(return false, parseVec3f, model.transform.pos, "model position");
+  STARLET_PARSE_OR(return false, parseVec3f, model.transform.rot, "model rotation");
+  STARLET_PARSE_OR(return false, parseVec3f, model.transform.size, "model scale");
   if (!parseColour(p, model.colour.colour) && !parseSpecialColour(p, model.mode))
     return false;
-  PARSE_OR(return false, parseVec4f, model.colour.specular, "model specular");
+  STARLET_PARSE_OR(return false, parseVec4f, model.colour.specular, "model specular");
   return true;
 }
 

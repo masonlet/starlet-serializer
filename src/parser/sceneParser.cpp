@@ -90,13 +90,13 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	}
 	else if (strcmp(nameStr, "textureAdd") == 0) {
 		TextureConnection data;
-		PARSE_STRING_OR(return false, p, data.modelName, 64, "texture connection model name");
-		PARSE_OR(return false, parseUInt, data.slot, "texture connection slot");
+		STARLET_PARSE_STRING_OR(return false, p, data.modelName, 64, "texture connection model name");
+		STARLET_PARSE_OR(return false, parseUInt, data.slot, "texture connection slot");
 		if (data.slot >= ModelData::NUM_TEXTURES)
 			return Logger::error("Parser", "textureAdd", "Invalid texture slot index: " + std::to_string(data.slot) + " for model: " + data.modelName);
 
-		PARSE_STRING_OR(return false, p, data.textureName, 128, "texture connection name");
-		PARSE_OR(return false, parseFloat, data.mix, "texture connection mix");
+		STARLET_PARSE_STRING_OR(return false, p, data.textureName, 128, "texture connection name");
+		STARLET_PARSE_OR(return false, parseFloat, data.mix, "texture connection mix");
 
 		scene.textureConnections.push_back(data);
 		return true;

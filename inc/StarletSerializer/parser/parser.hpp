@@ -3,28 +3,6 @@
 #include <string>
 #include <vector>
 
-#ifndef PARSE_OR 
-#define PARSE_OR(onFail, parser, target, errorMsg) \
-do { \
-  if (!(parser(p, target))) { \
-      if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
-      onFail; \
-	} \
-} while(0)
-#endif
-
-#ifndef PARSE_STRING_OR
-#define PARSE_STRING_OR(onFail, p, target, size, label) \
-  do {\
-    char temp[size]{}; \
-    if (!parseToken(p, reinterpret_cast<unsigned char*>(temp), size) || strlen(temp) == 0) { \
-      fprintf(stderr, "[Parser ERROR] Failed to parse %s\n", label); \
-      onFail; \
-    } \
-    target = temp; \
-  } while (0)
-#endif
-
 namespace Starlet {
 
 namespace Math {
@@ -37,9 +15,31 @@ template <typename T> struct Vec4;
 
 namespace Serializer {
 
+#ifndef STARLET_PARSE_OR 
+#define STARLET_PARSE_OR(onFail, parser, target, errorMsg) \
+do { \
+  if (!(parser(p, target))) { \
+      if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
+      onFail; \
+	} \
+} while(0)
+#endif
+
+#ifndef STARLET_PARSE_STRING_OR
+#define STARLET_PARSE_STRING_OR(onFail, p, target, size, label) \
+  do {\
+    char temp[size]{}; \
+    if (!parseToken(p, reinterpret_cast<unsigned char*>(temp), size) || strlen(temp) == 0) { \
+      fprintf(stderr, "[Parser ERROR] Failed to parse %s\n", label); \
+      onFail; \
+    } \
+    target = temp; \
+  } while (0)
+#endif
+
 class Parser {
 public:
-	const size_t MAX_SIZE = static_cast<size_t>(200 * 1024) * 1024; //200MB Limit
+	static constexpr size_t MAX_SIZE = static_cast<size_t>(200 * 1024) * 1024; //200MB Limit
 
 	bool loadFile(std::string& out, const std::string& path);
 	bool loadBinaryFile(std::vector<unsigned char>& dataOut, const std::string& path);
