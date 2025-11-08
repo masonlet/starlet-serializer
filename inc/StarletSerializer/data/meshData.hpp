@@ -6,7 +6,7 @@
 
 namespace Starlet::Serializer {
 
-struct PlyData {
+struct MeshData {
 	std::vector<Math::Vertex> vertices;
 	std::vector<unsigned int> indices;
 	unsigned int numVertices{ 0 }, numIndices{ 0 }, numTriangles{ 0 };

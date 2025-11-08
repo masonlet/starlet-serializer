@@ -1,11 +1,11 @@
-#include "StarletSerializer/parser/plyParser.hpp"
-#include "StarletSerializer/data/plyData.hpp"
+#include "StarletSerializer/parser/mesh/plyParser.hpp"
+#include "StarletSerializer/data/meshData.hpp"
 
 #include "StarletLogger/logger.hpp"
 
 namespace Starlet::Serializer {
 
-bool PlyParser::parse(const std::string& path, PlyData& out) {
+bool PlyParser::parse(const std::string& path, MeshData& out) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path))
 		return false;
@@ -140,7 +140,7 @@ bool PlyParser::parsePropertyLine(const unsigned char*& p, bool& hasNx, bool& ha
 	return true;
 }
 
-bool PlyParser::parseVertices(const unsigned char*& p, PlyData& out) {
+bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 	if (!p) return Logger::error("PlyParser", "parseVertices", "Input pointer is null\n");
 	if (!out.numVertices) return Logger::error("PlyParser", "parseVertices", "No vertices declared in header\n");
 
@@ -246,7 +246,7 @@ bool PlyParser::parseVertices(const unsigned char*& p, PlyData& out) {
 	out.maxY = maxY;
 	return true;
 }
-bool PlyParser::parseIndices(const unsigned char*& p, PlyData& out) {
+bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 	if (!p) return Logger::error("PlyParser", "parseIndices", "Input pointer is null");
 	if (out.indices.empty() || out.numIndices == 0) return Logger::error("PlyParser", "parseIndices", "Index buffer not allocated");
 
