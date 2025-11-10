@@ -1,5 +1,5 @@
-# StarletSerializer
-A lightweight serialization library for **Starlet** projects to handle both data reading and writing, designed with OpenGL engines in mind.
+# Starlet Serializer
+A lightweight serialization library for **Starlet** projects to handle both data reading and writing.
 
 ## Features
 - **Logging Utils**
@@ -19,8 +19,11 @@ A lightweight serialization library for **Starlet** projects to handle both data
 ```cmake
 include(FetchContent)
 
-FetchContent_Declare(StarletSerializer GIT_REPOSITORY https://github.com/Masonlet/StarletSerializer.git GIT_TAG main)
-FetchContent_MakeAvailable(StarletSerializer)
+FetchContent_Declare(starlet_serializer
+  GIT_REPOSITORY https://github.com/masonlet/starlet-serializer.git 
+  GIT_TAG main
+)
+FetchContent_MakeAvailable(starlet_serializer)
 
-target_link_libraries(YourAppName PRIVATE StarletSerializer)
+target_link_libraries(app_name PRIVATE starlet_serializer)
 ```

@@ -1,5 +1,5 @@
-#include "StarletSerializer/parser/sceneParser.hpp"
-#include "StarletSerializer/data/velocityData.hpp"
+#include "starlet-serializer/parser/sceneParser.hpp"
+#include "starlet-serializer/data/velocityData.hpp"
 
 namespace Starlet::Serializer {
 

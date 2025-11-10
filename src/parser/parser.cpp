@@ -1,9 +1,9 @@
-#include "StarletSerializer/parser/parser.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-serializer/parser/parser.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletMath/vec2.hpp"
-#include "StarletMath/vec3.hpp"
-#include "StarletMath/vec4.hpp"
+#include "starlet-math/vec2.hpp"
+#include "starlet-math/vec3.hpp"
+#include "starlet-math/vec4.hpp"
 
 #include <cstdlib>  
 #include <cstring>

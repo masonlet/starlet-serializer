@@ -1,5 +1,5 @@
-#include "StarletSerializer/parser/sceneParser.hpp"
-#include "StarletSerializer/data/cameraData.hpp"
+#include "starlet-serializer/parser/sceneParser.hpp"
+#include "starlet-serializer/data/cameraData.hpp"
 
 namespace Starlet::Serializer {
 

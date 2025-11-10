@@ -1,9 +1,9 @@
-#include "StarletSerializer/parser/imageParser.hpp"
+#include "starlet-serializer/parser/imageParser.hpp"
 
-#include "StarletSerializer/parser/image/bmpParser.hpp"
-#include "StarletSerializer/parser/image/tgaParser.hpp"
+#include "starlet-serializer/parser/image/bmpParser.hpp"
+#include "starlet-serializer/parser/image/tgaParser.hpp"
 
-#include "StarletLogger/logger.hpp"
+#include "starlet-logger/logger.hpp"
 
 #include <memory>
 

@@ -1,7 +1,7 @@
-#include "StarletSerializer/parser/sceneParser.hpp"
-#include "StarletSerializer/data/sceneData.hpp"
+#include "starlet-serializer/parser/sceneParser.hpp"
+#include "starlet-serializer/data/sceneData.hpp"
 
-#include "StarletLogger/logger.hpp"
+#include "starlet-logger/logger.hpp"
 
 namespace Starlet::Serializer {
 

@@ -1,8 +1,8 @@
-#include "StarletSerializer/parser/meshParser.hpp"
+#include "starlet-serializer/parser/meshParser.hpp"
 
-#include "StarletSerializer/parser/mesh/plyParser.hpp"
+#include "starlet-serializer/parser/mesh/plyParser.hpp"
 
-#include "StarletLogger/logger.hpp"
+#include "starlet-logger/logger.hpp"
 
 #include <memory>
 

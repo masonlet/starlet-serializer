@@ -1,6 +1,6 @@
-#include "StarletSerializer/parser/sceneParser.hpp"
+#include "starlet-serializer/parser/sceneParser.hpp"
 
-#include "StarletMath/vec4.hpp"
+#include "starlet-math/vec4.hpp"
 
 namespace Starlet::Serializer {
 

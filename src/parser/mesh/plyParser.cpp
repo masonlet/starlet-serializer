@@ -1,7 +1,7 @@
-#include "StarletSerializer/parser/mesh/plyParser.hpp"
-#include "StarletSerializer/data/meshData.hpp"
+#include "starlet-serializer/parser/mesh/plyParser.hpp"
+#include "starlet-serializer/data/meshData.hpp"
 
-#include "StarletLogger/logger.hpp"
+#include "starlet-logger/logger.hpp"
 
 namespace Starlet::Serializer {
 

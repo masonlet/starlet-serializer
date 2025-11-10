@@ -1,7 +1,7 @@
-#include "StarletSerializer/parser/image/bmpParser.hpp"
-#include "StarletSerializer/data/imageData.hpp"
+#include "starlet-serializer/parser/image/bmpParser.hpp"
+#include "starlet-serializer/data/imageData.hpp"
 
-#include "StarletLogger/logger.hpp"
+#include "starlet-logger/logger.hpp"
 
 namespace Starlet::Serializer {
 

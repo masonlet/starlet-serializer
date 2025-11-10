@@ -1,16 +1,16 @@
-#include "StarletSerializer/writer/writer.hpp"
-#include "StarletLogger/logger.hpp"
+#include "starlet-serializer/writer/writer.hpp"
+#include "starlet-logger/logger.hpp"
 
-#include "StarletSerializer/data/sceneData.hpp"
-#include "StarletSerializer/data/modelData.hpp"
-#include "StarletSerializer/data/lightData.hpp"
-#include "StarletSerializer/data/cameraData.hpp"
-#include "StarletSerializer/data/gridData.hpp"
-#include "StarletSerializer/data/textureData.hpp"
-#include "StarletSerializer/data/primitiveData.hpp"
-#include "StarletSerializer/data/transformData.hpp"
-#include "StarletSerializer/data/velocityData.hpp"
-#include "StarletSerializer/data/colourData.hpp"
+#include "starlet-serializer/data/sceneData.hpp"
+#include "starlet-serializer/data/modelData.hpp"
+#include "starlet-serializer/data/lightData.hpp"
+#include "starlet-serializer/data/cameraData.hpp"
+#include "starlet-serializer/data/gridData.hpp"
+#include "starlet-serializer/data/textureData.hpp"
+#include "starlet-serializer/data/primitiveData.hpp"
+#include "starlet-serializer/data/transformData.hpp"
+#include "starlet-serializer/data/velocityData.hpp"
+#include "starlet-serializer/data/colourData.hpp"
 
 #include <iomanip>
 

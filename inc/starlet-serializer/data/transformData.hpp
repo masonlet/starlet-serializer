@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StarletMath/vec3.hpp"
+#include "starlet-math/vec3.hpp"
 
 namespace Starlet::Serializer {
 

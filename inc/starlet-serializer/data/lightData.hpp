@@ -2,8 +2,8 @@
 
 #include "data.hpp"
 
-#include "StarletMath/vec2.hpp"
-#include "StarletMath/vec4.hpp"
+#include "starlet-math/vec2.hpp"
+#include "starlet-math/vec4.hpp"
 
 namespace Starlet::Serializer {
 

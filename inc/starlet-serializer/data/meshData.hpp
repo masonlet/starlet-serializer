@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "StarletMath/vertex.hpp"
+#include "starlet-math/vertex.hpp"
 
 namespace Starlet::Serializer {
 
