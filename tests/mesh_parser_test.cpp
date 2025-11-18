@@ -18,7 +18,7 @@ namespace {
 }
 
 
-// Format detection tests
+// PLY format detection
 TEST(MeshParserTest, DetectFormatPlyLowercase) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
@@ -40,6 +40,7 @@ TEST(MeshParserTest, DetectFormatPlyMixedCase) {
   EXPECT_FALSE(parser.parse("test_data/model.PlY", out));
 }
 
+// Edge cases
 TEST(MeshParserTest, DetectFormatNoExtension) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
