@@ -81,7 +81,7 @@ bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVertic
 		else if (!(strncmp((const char*)p, "ply", 3) == 0)
 			&& !(strncmp((const char*)p, "format", 6) == 0)
 			&& !(strncmp((const char*)p, "comment", 7) == 0))
-			Logger::debugLog("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
+			Logger::debug("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
 
 		p = nextLine;
 	}

@@ -19,7 +19,7 @@ if(NOT TARGET ${PROJECT_NAME})
     if(NOT TARGET starlet_logger)
       FetchContent_Declare(starlet_logger
         GIT_REPOSITORY https://github.com/masonlet/starlet-logger.git 
-        GIT_TAG feature/unit-tests
+        GIT_TAG main
       )
     endif()
 
