@@ -28,7 +28,6 @@ namespace {
 }
 
 
-
 // File Loading Tests
 TEST(ParserTest, LoadFileSuccess) {
   createTestFile("test_data/valid.txt", "test content");
@@ -74,7 +73,6 @@ TEST(ParserTest, LoadBinaryFileNonexistent) {
   std::vector<unsigned char> out;
   EXPECT_FALSE(parser.loadBinaryFile(out, "test_data/nonexistent.bin"));
 }
-
 
 
 // parseBool Tests
@@ -170,7 +168,6 @@ TEST(ParserTest, ParseBoolNullptr) {
 }
 
 
-
 // parseUInt Tests
 TEST(ParserTest, ParseUIntValid) {
   SSerializer::Parser parser;
@@ -240,7 +237,7 @@ TEST(ParserTest, ParseUIntOverflow) {
   const unsigned char* p = reinterpret_cast<const unsigned char*>("4294967296"); // UINT_MAX (4294967295) + 1
   unsigned int out{};
   EXPECT_TRUE(parser.parseUInt(p, out));
-  EXPECT_EQ(out, 0u); // Should wrap to 0 (overflow behavior)
+  EXPECT_EQ(out, 0u);
 }
 
 TEST(ParserTest, ParseUIntLargeOverflow) {
