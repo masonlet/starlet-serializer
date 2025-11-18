@@ -230,7 +230,7 @@ const unsigned char* Parser::skipWhitespace(const unsigned char* p, bool skipCom
 }
 
 const unsigned char* Parser::trimEOL(const unsigned char* p, const unsigned char* end) {
-	while (end && *end && end > p && (end[-1] == '\n' || end[-1] == '\r' || end[-1] == ',')) --end;
+	while (end && end > p && (end[-1] == '\n' || end[-1] == '\r' || end[-1] == ',')) --end;
 	return end ? end : nullptr;
 }
 
@@ -242,7 +242,7 @@ bool Parser::getFileSize(FILE* file, size_t& sizeOut) const {
 	const long size = ftell(file);
 	if (size == -1L) return Logger::error("FileParser", "getFileSize", "Invalid file, ftell failed");
 
-	if (size <= 0 || static_cast<size_t>(size) > MAX_SIZE)
+	if (size < 0 || static_cast<size_t>(size) > MAX_SIZE)
 		return Logger::error("FileParser", "getFileSize", "Invalid file size");
 
 	if (fseek(file, 0, SEEK_SET) != 0) return Logger::error("FileParser", "getFileSize", "Failed to rewind file");

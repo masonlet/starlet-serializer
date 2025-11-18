@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
 
-TEST(SerializerTest, PlaceHolder) {
+TEST(SerializerTest, ImagePlaceHolder) {
   EXPECT_TRUE(true);
 }
