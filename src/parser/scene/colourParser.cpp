@@ -41,14 +41,16 @@ bool SceneParser::parseNamedColour(const unsigned char*& p, Math::Vec4<float>& c
 	unsigned char input[64]{};
 	if (!parseToken(p, input, sizeof(input)) || !p) return false;
 
-	const char* name = reinterpret_cast<const char*>(input);
-	if (strcmp(name, "Red") == 0)     colour = { 1.0f, 0.0f, 0.0f, 1.0f };
-	else if (strcmp(name, "Green") == 0)   colour = { 0.0f, 1.0f, 0.0f, 1.0f };
-	else if (strcmp(name, "Blue") == 0)    colour = { 0.0f, 0.0f, 1.0f, 1.0f };
-	else if (strcmp(name, "Yellow") == 0)  colour = { 1.0f, 1.0f, 0.0f, 1.0f };
-	else if (strcmp(name, "White") == 0)   colour = { 1.0f, 1.0f, 1.0f, 1.0f };
-	else if (strcmp(name, "Gray") == 0
-		|| strcmp(name, "Grey") == 0)    colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+	std::string name = reinterpret_cast<const char*>(input);
+	for (auto& c : name) c = std::tolower(c);
+
+	if      (name == "red")    colour = { 1.0f, 0.0f, 0.0f, 1.0f };
+	else if (name == "green")  colour = { 0.0f, 1.0f, 0.0f, 1.0f };
+	else if (name == "blue")   colour = { 0.0f, 0.0f, 1.0f, 1.0f };
+	else if (name == "yellow") colour = { 1.0f, 1.0f, 0.0f, 1.0f };
+	else if (name == "white")  colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+	else if (name == "gray" 
+		    || name == "grey")   colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 	else return false;
 	return true;

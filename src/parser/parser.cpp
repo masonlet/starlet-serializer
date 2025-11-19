@@ -80,6 +80,8 @@ bool Parser::parseBool(const unsigned char*& p, bool& out) {
 	unsigned char tok[6]{};
 	if (!parseToken(p, tok, sizeof(tok))) return false;
 
+	for (unsigned char& c : tok) c = static_cast<unsigned char>(std::tolower(c));
+
 	const char* str = reinterpret_cast<const char*>(tok);
 	if (strcmp(str, "true") == 0 || strcmp(str, "on") == 0) { out = true; return true; }
 	if (strcmp(str, "false") == 0 || strcmp(str, "off") == 0) { out = false; return true; }

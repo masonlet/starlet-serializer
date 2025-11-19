@@ -139,25 +139,28 @@ TEST(ParserTest, ParseBoolInvalid) {
   EXPECT_FALSE(parser.parseBool(p, out));
 }
 
-TEST(ParserTest, ParseBoolCaseSensitiveTrue) {
+TEST(ParserTest, ParseBoolCaseInsensitiveTrue) {
   SSerializer::Parser parser;
   const unsigned char* p = reinterpret_cast<const unsigned char*>("TRUE");
   bool out{};
-  EXPECT_FALSE(parser.parseBool(p, out));
+  EXPECT_TRUE(parser.parseBool(p, out));
+  EXPECT_TRUE(out);
 }
 
-TEST(ParserTest, ParseBoolCaseSensitiveFalse) {
+TEST(ParserTest, ParseBoolCaseInsensitiveFalse) {
   SSerializer::Parser parser;
   const unsigned char* p = reinterpret_cast<const unsigned char*>("False");
   bool out{};
-  EXPECT_FALSE(parser.parseBool(p, out));
+  EXPECT_TRUE(parser.parseBool(p, out));
+  EXPECT_FALSE(out);
 }
 
-TEST(ParserTest, ParseBoolCaseSensitiveOn) {
+TEST(ParserTest, ParseBoolCaseInsensitiveOn) {
   SSerializer::Parser parser;
   const unsigned char* p = reinterpret_cast<const unsigned char*>("ON");
   bool out{};
-  EXPECT_FALSE(parser.parseBool(p, out)); 
+  EXPECT_TRUE(parser.parseBool(p, out));
+  EXPECT_TRUE(out);
 }
 
 TEST(ParserTest, ParseBoolNullptr) {
