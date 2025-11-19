@@ -2,6 +2,7 @@
 
 #include "starlet-serializer/parser/parser.hpp"
 
+#include <cstdint> 
 #include <optional>
 
 namespace Starlet::Serializer {
@@ -10,6 +11,8 @@ struct ImageData;
 
 class ImageParserBase : public Parser {
 public:
+	virtual ~ImageParserBase() = default;
+
 	virtual bool parse(const std::string& path, ImageData& out) = 0;
 
 protected:

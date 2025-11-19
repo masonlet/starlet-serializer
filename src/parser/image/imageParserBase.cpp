@@ -7,7 +7,7 @@ namespace Starlet::Serializer {
 
 void ImageParserBase::clearImageData(ImageData& data) const {
 	data.pixels.clear();
-	data.pixelSize = data.byteSize = 0;
+	data.byteSize = data.pixelSize = 0;
 	data.width = data.height = 0;
 }
 
