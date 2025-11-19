@@ -8,6 +8,7 @@ template <GridType T>
 bool SceneParser::parseGrid(const unsigned char*& p, GridData& grid) {
   grid.type = T;
   STARLET_PARSE_STRING_OR(return false, p, grid.name, 64, "grid name");
+  if (!std::isalpha(grid.name[0])) return false;
   STARLET_PARSE_OR(return false, parseUInt, grid.count, "grid count");
   STARLET_PARSE_OR(return false, parseFloat, grid.spacing, "grid spacing");
   STARLET_PARSE_OR(return false, parseVec3f, grid.transform.pos, "grid start position");

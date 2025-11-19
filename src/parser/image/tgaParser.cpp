@@ -44,10 +44,10 @@ bool TgaParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 	const uint8_t imageType     = p[2];
 
 	if (imageType != TGA_IMAGE_TYPE_UNCOMPRESSED_TRUE_COLOR)
-		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA image type (only uncompressed true-color TGA supported (2)), got: " + std::to_string(imageType));
+		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA image type (only uncompressed true-colour TGA supported (2)), got: " + std::to_string(imageType));
 
 	if (colourMapType != TGA_COLOUR_MAP_TYPE_NONE)
-		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA color map type (only no color map supported (0)), got: " + std::to_string(colourMapType));
+		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA colour map type (only no colour map supported (0)), got: " + std::to_string(colourMapType));
 
 	width = static_cast<uint32_t>(readUint16(p, 12));
 	height = static_cast<uint32_t>(readUint16(p, 14));

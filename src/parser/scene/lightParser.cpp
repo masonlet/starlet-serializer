@@ -43,7 +43,7 @@ bool SceneParser::parseLight(const unsigned char*& p, LightData& light) {
 	STARLET_PARSE_OR(return false, parseLightType, light.type, "light type");
 	STARLET_PARSE_OR(return false, parseVec3f, light.transform.pos, "light position");
 	STARLET_PARSE_OR(return false, parseVec3f, light.transform.rot, "light direction");
-	STARLET_PARSE_OR(return false, parseVec4f, light.colour.colour, "light diffuse");
+	STARLET_PARSE_OR(return false, parseColour, light.colour.colour, "light diffuse");
 	STARLET_PARSE_OR(return false, parseVec4f, light.attenuation, "light attenuation");
 	STARLET_PARSE_OR(return false, parseVec2f, light.param1, "light param1");
 	return true;

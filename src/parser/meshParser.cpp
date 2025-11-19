@@ -16,6 +16,7 @@ namespace Starlet::Serializer {
 		case MeshFormat::PLY:
 			parser = std::make_unique<PlyParser>();
 			break;
+		default:
 			Logger::error("ImageParser", "parse", "Unsupported image format: " + path);
 			return false;
 		}

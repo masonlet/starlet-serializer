@@ -5,6 +5,14 @@
 
 namespace Starlet::Serializer {
 
+namespace {
+	inline bool strncasecmp(const char* a, const char* b, size_t n) {
+		for (size_t i = 0; i < n; ++i)
+			if (tolower(a[i]) != tolower(b[i])) return false;
+		return true;
+	}
+}
+
 bool PlyParser::parse(const std::string& path, MeshData& out) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path))
@@ -78,10 +86,10 @@ bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVertic
 			p = nextLine;
 			return true;
 		}
-		else if (!(strncmp((const char*)p, "ply", 3) == 0)
-			&& !(strncmp((const char*)p, "format", 6) == 0)
-			&& !(strncmp((const char*)p, "comment", 7) == 0))
-			Logger::debugLog("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
+		else if (!(strncasecmp((const char*)p, "ply", 3) == 0)
+			&& !(strncasecmp((const char*)p, "format", 6) == 0)
+			&& !(strncasecmp((const char*)p, "comment", 7) == 0))
+			Logger::debug("parsePlyHeader", "Unknown line in PLY header: %.*s\n" + static_cast<int>(lineEnd - p), (const char*)p);
 
 		p = nextLine;
 	}
@@ -242,6 +250,9 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 		p = nextLine;
 	}
 
+	if (i != out.numVertices) 
+		return Logger::error("PlyParser", "parseVertices", "Vertex count declared: " + std::to_string(out.numVertices) + " but parsed: " + std::to_string(i));
+
 	out.minY = minY;
 	out.maxY = maxY;
 	return true;
@@ -274,22 +285,28 @@ bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 		unsigned int i0{ 0 }, i1{ 0 }, i2{ 0 };
 		bool valid = true;
 		while (valid) {
-			STARLET_PARSE_OR(valid = false, parseUInt, i0, "Failed to parse indice 1");
-			STARLET_PARSE_OR(valid = false, parseUInt, i1, "Failed to parse indice 2");
-			STARLET_PARSE_OR(valid = false, parseUInt, i2, "Failed to parse indice 3");
+			STARLET_PARSE_OR(valid = false, parseUInt, i0, "Failed to parse index 1");
+			STARLET_PARSE_OR(valid = false, parseUInt, i1, "Failed to parse index 2");
+			STARLET_PARSE_OR(valid = false, parseUInt, i2, "Failed to parse index 3");
 			break;
 		}
 
 		if (valid) {
+			if (i0 >= out.numVertices || i1 >= out.numVertices || i2 >= out.numVertices) 
+				return Logger::error("PlyParser", "parseIndices", "Index out of bounds: face references vertex >= " + std::to_string(out.numVertices));
+			
 			unsigned int base = triangleIndex * 3;
-			out.indices[base + 0] = i0;
-			out.indices[base + 1] = i1;
-			out.indices[base + 2] = i2;
+			out.indices[static_cast<size_t>(base) + 0] = i0;
+			out.indices[static_cast<size_t>(base) + 1] = i1;
+			out.indices[static_cast<size_t>(base) + 2] = i2;
 			++triangleIndex;
 		}
 
 		p = nextLine;
 	}
+
+	if (triangleIndex != out.numTriangles) 
+		return Logger::error("PlyParser", "parseIndices", "Face count declared: " + std::to_string(out.numTriangles) +	" but parsed: " + std::to_string(triangleIndex));
 
 	return true;
 }

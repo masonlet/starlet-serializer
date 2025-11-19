@@ -155,6 +155,20 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 		return true;
 	}
 	else if (strcmp(nameStr, "ambient") == 0) {
+		unsigned char tok[64]{};
+		const unsigned char* savePos = p;
+		parseToken(p, tok, sizeof(tok));
+		p = savePos;
+
+		const char* s = reinterpret_cast<const char*>(tok);
+		if (!(strcmp(s, "true") == 0 ||
+			    strcmp(s, "false") == 0 ||
+			    strcmp(s, "on") == 0 ||
+			    strcmp(s, "off") == 0 ||
+			    strcmp(s, "1") == 0 ||
+			    strcmp(s, "0") == 0))
+			return Logger::error("SceneLoader", "processSceneLine", "Ambient missing enabled boolean");
+	
 		bool enabled{ false };
 		if (!parseBool(p, enabled)) return Logger::error("SceneLoader", "processSceneLine", "Failed to parse ambient enabled");
 
