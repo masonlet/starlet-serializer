@@ -3,6 +3,9 @@
 
 #include "starlet-logger/logger.hpp"
 
+#include <cstring>  
+#include <cfloat>
+
 namespace Starlet::Serializer {
 
 namespace {
