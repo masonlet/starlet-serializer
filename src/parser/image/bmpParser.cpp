@@ -31,7 +31,7 @@ bool BmpParser::parse(const std::string& path, ImageData& out) {
 	const bool bottomUp = (height > 0);
 	const uint32_t absHeight = static_cast<uint32_t>(bottomUp ? height : -height);
 
-	if (!allocatePixelBuffer(out, width, absHeight))
+	if (!allocatePixelBuffer(out, width, absHeight)) 
 		return false;
 
 	if (!copyPixelData(p, file->size(), dataOffset, out, width, absHeight, bottomUp))
@@ -44,10 +44,10 @@ bool BmpParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 	if (!validateFileSignature(p, fileSize)) return false;
 
 	dataOffset = readUint32(p, 10);
-	if (dataOffset >= fileSize) return Logger::error("BmpParser", "parseBmpHeader", "Invalid data offset: " + std::to_string(dataOffset));
+	if (dataOffset >= fileSize) return Logger::error("BmpParser", "parseHeader", "Invalid data offset: " + std::to_string(dataOffset));
 
 	uint32_t dibSize = readUint32(p, 14);
-	if (dibSize < BMP_DIB_HEADER_SIZE_MIN) return Logger::error("BmpParser", "parseBmpHeader", "Unsupported DIB header size: " + std::to_string(dibSize));
+	if (dibSize < BMP_DIB_HEADER_SIZE_MIN) return Logger::error("BmpParser", "parseHeader", "Unsupported DIB header size: " + std::to_string(dibSize));
 
 	width = readUint32(p, 18);
 	height = static_cast<int32_t>(readUint32(p, 22));
@@ -55,13 +55,13 @@ bool BmpParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 	if (!validateDimensions(width, absHeight)) return false;
 
 	uint16_t planes = readUint16(p, 26);
-	if (planes != BMP_PLANES_EXPECTED) return Logger::error("BmpParser", "parseBmpHeader", "Planes != 1: " + std::to_string(planes));
+	if (planes != BMP_PLANES_EXPECTED) return Logger::error("BmpParser", "parseHeader", "Planes != 1: " + std::to_string(planes));
 
 	uint16_t bpp = readUint16(p, 28);
-	if (bpp != BMP_BPP_24) return Logger::error("BmpParser", "parseBmpHeader", "Only 24bpp supported: " + std::to_string(bpp));
+	if (bpp != BMP_BPP_24) return Logger::error("BmpParser", "parseHeader", "Only 24bpp supported: " + std::to_string(bpp));
 
 	uint32_t compression = readUint32(p, 30);
-	if (compression != BMP_COMPRESSION_NONE) return Logger::error("BmpParser", "parseBmpHeader", "Compressed BMP not supported: " + std::to_string(compression));
+	if (compression != BMP_COMPRESSION_NONE) return Logger::error("BmpParser", "parseHeader", "Compressed BMP not supported: " + std::to_string(compression));
 
 	return true;
 }

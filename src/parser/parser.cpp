@@ -13,12 +13,12 @@ namespace Starlet::Serializer {
 
 bool Parser::loadFile(std::string& out, const std::string& path) {
 	FILE* file = fopen(path.c_str(), "rb");
-	if (!file) return Logger::error("FileParser", "loadFile", "Failed to open file: " + path);
+	if (!file) return Logger::error("Parser", "loadFile", "Failed to open file: " + path);
 
 	size_t fileSize;
 	if (!getFileSize(file, fileSize)) {
 		fclose(file);
-		return Logger::error("FileParser", "loadFile", "Failed to get file size");
+		return Logger::error("Parser", "loadFile", "Failed to get file size");
 	}
 
 	out.resize(fileSize);
@@ -30,7 +30,7 @@ bool Parser::loadFile(std::string& out, const std::string& path) {
 			if (ferror(file)) {
 				fclose(file);
 				out.clear();
-				return Logger::error("FileParser", "loadFile", "fread failed at byte " + std::to_string(bytesRead));
+				return Logger::error("Parser", "loadFile", "fread failed at byte " + std::to_string(bytesRead));
 			}
 			break;
 		}
@@ -41,19 +41,19 @@ bool Parser::loadFile(std::string& out, const std::string& path) {
 
 	if (bytesRead != fileSize) {
 		out.clear();
-		return Logger::error("FileParser", "loadFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
+		return Logger::error("Parser", "loadFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
 	}
 	return true;
 }
 
 bool Parser::loadBinaryFile(std::vector<unsigned char>& dataOut, const std::string& path) {
 	FILE* file = fopen(path.c_str(), "rb");
-	if (!file) return Logger::error("FileParser", "loadBinaryFile", "Failed to open file: " + path);
+	if (!file) return Logger::error("Parser", "loadBinaryFile", "Failed to open file: " + path);
 
 	size_t fileSize;
 	if (!getFileSize(file, fileSize)) {
 		fclose(file);
-		return Logger::error("FileParser", "loadBinaryFile", "Failed to get file size");
+		return Logger::error("Parser", "loadBinaryFile", "Failed to get file size");
 	}
 
 	dataOut.resize(fileSize);
@@ -62,7 +62,7 @@ bool Parser::loadBinaryFile(std::vector<unsigned char>& dataOut, const std::stri
 
 	if (bytesRead != fileSize) {
 		dataOut.clear();
-		return Logger::error("FileParser", "loadBinaryFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
+		return Logger::error("Parser", "loadBinaryFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
 	}
 
 	return true;
@@ -239,15 +239,15 @@ const unsigned char* Parser::trimEOL(const unsigned char* p, const unsigned char
 
 
 bool Parser::getFileSize(FILE* file, size_t& sizeOut) const {
-	if (fseek(file, 0, SEEK_END) != 0) return Logger::error("FileParser", "getFileSize", "Failed to seek end of file");
+	if (fseek(file, 0, SEEK_END) != 0) return Logger::error("Parser", "getFileSize", "Failed to seek end of file");
 
 	const long size = ftell(file);
-	if (size == -1L) return Logger::error("FileParser", "getFileSize", "Invalid file, ftell failed");
+	if (size == -1L) return Logger::error("Parser", "getFileSize", "Invalid file, ftell failed");
 
 	if (size < 0 || static_cast<size_t>(size) > MAX_SIZE)
-		return Logger::error("FileParser", "getFileSize", "Invalid file size");
+		return Logger::error("Parser", "getFileSize", "Invalid file size");
 
-	if (fseek(file, 0, SEEK_SET) != 0) return Logger::error("FileParser", "getFileSize", "Failed to rewind file");
+	if (fseek(file, 0, SEEK_SET) != 0) return Logger::error("Parser", "getFileSize", "Failed to rewind file");
 
 	sizeOut = static_cast<size_t>(size);
 	return true;

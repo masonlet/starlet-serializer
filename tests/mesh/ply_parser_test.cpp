@@ -2,21 +2,12 @@
 
 #include "starlet-serializer/parser/meshParser.hpp"
 #include "starlet-serializer/data/meshData.hpp"
+#include "../test_helpers.hpp"
 
 #include <filesystem>
 #include <fstream>
 
 namespace SSerializer = Starlet::Serializer;
-
-namespace {
-  void createTestFile(const std::string& path, const std::string_view& content) {
-    std::filesystem::path p(path);
-    std::filesystem::create_directories(p.parent_path());
-    std::ofstream file(path);
-    file << content;
-  }
-}
-
 
 // Valid PLY parsing tests
 TEST(PlyParserTest, ValidPlyMinimal) {

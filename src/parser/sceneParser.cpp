@@ -7,7 +7,7 @@ namespace Starlet::Serializer {
 
 bool SceneParser::parse(const std::string& path, SceneData& scene) {
 	std::string src{};
-	if (!loadFile(src, path)) return Logger::error("SceneLoader", "loadScene", "Failed to load path: " + path);
+	if (!loadFile(src, path)) return Logger::error("SceneParser", "parse", "Failed to load path: " + path);
 
 	const unsigned char* p = reinterpret_cast<const unsigned char*>(src.c_str());
 	while (*p) {
@@ -26,7 +26,7 @@ bool SceneParser::parse(const std::string& path, SceneData& scene) {
 			std::string errorMsg;
 			errorMsg.reserve(len);
 			errorMsg.append(reinterpret_cast<const char*>(p), len);
-			return Logger::error("SceneManager", "loadTxtScene", std::string("Failed to process scene line: \"") + errorMsg + "\"");
+			return Logger::error("SceneParser", "parse", std::string("Failed to process scene line: \"") + errorMsg + "\"");
 		}
 
 		if (p < nextLine) p = nextLine;
@@ -51,7 +51,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "model") == 0) {
 		ModelData model;
 		if (!parseModel(p, model))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse model");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse model");
 
 		scene.models.push_back(model);
 		return true;
@@ -59,7 +59,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "light") == 0) {
 		LightData light;
 		if(!parseLight(p, light))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse light");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse light");
 
 		scene.lights.push_back(light);
 		return true;
@@ -67,7 +67,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "camera") == 0) {
 		CameraData camera;
 		if(!parseCamera(p, camera))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse camera");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse camera");
 
 		scene.cameras.push_back(camera);
 		return true;
@@ -75,7 +75,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "texture") == 0) {
 		TextureData texture;
 		if(!parseTexture(p, texture))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse texture");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse texture");
 
 		scene.textures.push_back(texture);
 		return true;
@@ -83,7 +83,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "textureCube") == 0) {
 		TextureData texture;
 		if(!parseCubeTexture(p, texture))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse cube texture");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse cube texture");
 
 		scene.textures.push_back(texture);
 		return true;
@@ -93,7 +93,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 		STARLET_PARSE_STRING_OR(return false, p, data.modelName, 64, "texture connection model name");
 		STARLET_PARSE_OR(return false, parseUInt, data.slot, "texture connection slot");
 		if (data.slot >= ModelData::NUM_TEXTURES)
-			return Logger::error("Parser", "textureAdd", "Invalid texture slot index: " + std::to_string(data.slot) + " for model: " + data.modelName);
+			return Logger::error("SceneParser", "parseSceneLine", "Invalid texture slot index: " + std::to_string(data.slot) + " for model: " + data.modelName);
 
 		STARLET_PARSE_STRING_OR(return false, p, data.textureName, 128, "texture connection name");
 		STARLET_PARSE_OR(return false, parseFloat, data.mix, "texture connection mix");
@@ -104,7 +104,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "triangle") == 0) {
 		PrimitiveData primitive;
 		if(!parseTriangle(p, primitive))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse triangle");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse triangle");
 
 		scene.primitives.push_back(primitive);
 		return true;
@@ -112,7 +112,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "square") == 0) {
 		PrimitiveData primitive;
 		if(!parseSquare(p, primitive))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse square");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse square");
 
 		scene.primitives.push_back(primitive);
 		return true;
@@ -120,7 +120,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "cube") == 0) {
 		PrimitiveData primitive;
 		if(!parseCube(p, primitive))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse cube");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse cube");
 
 		scene.primitives.push_back(primitive);
 		return true;
@@ -128,7 +128,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "squareGrid") == 0) {
 		GridData grid;
 		if(!parseSquareGrid(p, grid))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse square grid");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse square grid");
 
 		scene.grids.push_back(grid);
 		return true;
@@ -136,7 +136,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 	else if (strcmp(nameStr, "cubeGrid") == 0) {
 		GridData grid;
 		if(!parseCubeGrid(p, grid))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse cube grid");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse cube grid");
 
 		scene.grids.push_back(grid);
 		return true;
@@ -149,7 +149,7 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 		velocity.modelName = reinterpret_cast<const char*>(nameToken);
 
 		if(!parseVelocity(p, velocity))
-			return Logger::error("SceneLoader", "processSceneLine", "Failed to parse velocity");
+			return Logger::error("SceneParser", "parseSceneLine", "Failed to parse velocity");
 
 		scene.velocities.push_back(velocity);
 		return true;
@@ -167,20 +167,20 @@ bool SceneParser::parseSceneLine(const unsigned char*& p, SceneData& scene) {
 			    strcmp(s, "off") == 0 ||
 			    strcmp(s, "1") == 0 ||
 			    strcmp(s, "0") == 0))
-			return Logger::error("SceneLoader", "processSceneLine", "Ambient missing enabled boolean");
+			return Logger::error("SceneParser", "parseSceneLine", "Ambient missing enabled boolean");
 	
 		bool enabled{ false };
-		if (!parseBool(p, enabled)) return Logger::error("SceneLoader", "processSceneLine", "Failed to parse ambient enabled");
+		if (!parseBool(p, enabled)) return Logger::error("SceneParser", "parseSceneLine", "Failed to parse ambient enabled");
 
 		Math::Vec3 colour{ 0.0f, 0.0f, 0.0f };
-		if (!parseVec3f(p, colour)) return Logger::error("SceneLoader", "processSceneLine", "Failed to parse ambient colour");
+		if (!parseVec3f(p, colour)) return Logger::error("SceneParser", "parseSceneLine", "Failed to parse ambient colour");
 
 		scene.ambientEnabled = enabled;
 		scene.ambientLight = colour;
 		return true;
 	}
 
-	return Logger::error("SceneManager", "processSceneLine", "Failed to handle: " + std::string(nameStr));
+	return Logger::error("SceneParser", "parseSceneLine", "Failed to handle: " + std::string(nameStr));
 }
 
 }

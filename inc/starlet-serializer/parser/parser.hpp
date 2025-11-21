@@ -8,11 +8,9 @@
 namespace Starlet {
 
 namespace Math {
-
-template <typename T> struct Vec2;
-template <typename T> struct Vec3;
-template <typename T> struct Vec4;
-
+	template <typename T> struct Vec2;
+	template <typename T> struct Vec3;
+	template <typename T> struct Vec4;
 }
 
 namespace Serializer {
@@ -20,23 +18,23 @@ namespace Serializer {
 #ifndef STARLET_PARSE_OR 
 #define STARLET_PARSE_OR(onFail, parser, target, errorMsg) \
 do { \
-  if (!(parser(p, target))) { \
-      if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
-      onFail; \
+	if (!(parser(p, target))) { \
+			if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
+			onFail; \
 	} \
 } while(0)
 #endif
 
 #ifndef STARLET_PARSE_STRING_OR
 #define STARLET_PARSE_STRING_OR(onFail, p, target, size, label) \
-  do {\
-    char temp[size]{}; \
-    if (!parseToken(p, reinterpret_cast<unsigned char*>(temp), size) || strlen(temp) == 0) { \
-      fprintf(stderr, "[Parser ERROR] Failed to parse %s\n", label); \
-      onFail; \
-    } \
-    target = temp; \
-  } while (0)
+	do {\
+		char temp[size]{}; \
+		if (!parseToken(p, reinterpret_cast<unsigned char*>(temp), size) || strlen(temp) == 0) { \
+			fprintf(stderr, "[Parser ERROR] Failed to parse %s\n", label); \
+			onFail; \
+		} \
+		target = temp; \
+	} while (0)
 #endif
 
 class Parser {

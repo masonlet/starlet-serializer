@@ -1,7 +1,9 @@
 #include "gtest/gtest.h"
-#include "test_helpers.hpp"
+
 #include "starlet-serializer/parser/sceneParser.hpp"
 #include "starlet-serializer/data/sceneData.hpp"
+#include "test_helpers.hpp"
+
 #include "starlet-math/vec4.hpp"
 
 using namespace Starlet::Serializer;
