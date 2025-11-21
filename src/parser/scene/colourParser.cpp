@@ -50,7 +50,7 @@ bool SceneParser::parseNamedColour(const unsigned char*& p, Math::Vec4<float>& c
 	else if (name == "yellow") colour = { 1.0f, 1.0f, 0.0f, 1.0f };
 	else if (name == "white")  colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 	else if (name == "gray" 
-		    || name == "grey")   colour = { 0.5f, 0.5f, 0.5f, 1.0f };
+				|| name == "grey")   colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 	else return false;
 	return true;

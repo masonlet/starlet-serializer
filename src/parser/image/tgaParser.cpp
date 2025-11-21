@@ -44,10 +44,10 @@ bool TgaParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 	const uint8_t imageType     = p[2];
 
 	if (imageType != TGA_IMAGE_TYPE_UNCOMPRESSED_TRUE_COLOR)
-		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA image type (only uncompressed true-colour TGA supported (2)), got: " + std::to_string(imageType));
+		return Logger::error("TgaParser", "parseHeader", "Unsupported TGA image type (only uncompressed true-colour TGA supported (2)), got: " + std::to_string(imageType));
 
 	if (colourMapType != TGA_COLOUR_MAP_TYPE_NONE)
-		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA colour map type (only no colour map supported (0)), got: " + std::to_string(colourMapType));
+		return Logger::error("TgaParser", "parseHeader", "Unsupported TGA colour map type (only no colour map supported (0)), got: " + std::to_string(colourMapType));
 
 	width = static_cast<uint32_t>(readUint16(p, 12));
 	height = static_cast<uint32_t>(readUint16(p, 14));
@@ -56,14 +56,14 @@ bool TgaParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 
 	bpp = p[16];
 	if (bpp != 24 && bpp != 32)
-		return Logger::error("TgaParser", "parseTgaHeader", "Unsupported TGA bits per pixel (only 24 and 32 supported), got: " + std::to_string(bpp));
+		return Logger::error("TgaParser", "parseHeader", "Unsupported TGA bits per pixel (only 24 and 32 supported), got: " + std::to_string(bpp));
 
 	const uint8_t imageDescriptor = p[17];
 	topDown = (imageDescriptor & TGA_ORIGIN_TOP_BIT) != 0;
 
 	dataOffset = TGA_HEADER_SIZE + idLength;
 	if (dataOffset >= fileSize)
-		return Logger::error("TgaParser", "parseTgaHeader", "Invalid data offset");
+		return Logger::error("TgaParser", "parseHeader", "Invalid data offset");
 
 	return true;
 }

@@ -17,7 +17,7 @@ bool SceneParser::parseLightType(const unsigned char*& p, LightType& type) {
 		case 0: type = LightType::Point; break;
 		case 1: type = LightType::Spot; break;
 		case 2: type = LightType::Directional; break;
-		default: return Logger::error("Parser", "parseLightType", "Unknown light type");
+		default: return Logger::error("SceneParser", "parseLightType", "Unknown light type");
 		}
 
 		return true;
@@ -29,8 +29,8 @@ bool SceneParser::parseLightType(const unsigned char*& p, LightType& type) {
 		p = original;
 		return false;
 	}
-
-	if (strcmp((char*)typeName, "Point") == 0) type = LightType::Point;
+		 
+	if      (strcmp((char*)typeName, "Point") == 0) type = LightType::Point;
 	else if (strcmp((char*)typeName, "Spot") == 0) type = LightType::Spot;
 	else if (strcmp((char*)typeName, "Directional") == 0) type = LightType::Directional;
 	else return Logger::error("Parser", "parseLightType", "Unknown light type");

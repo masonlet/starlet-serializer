@@ -6,13 +6,13 @@
 
 namespace Starlet::Serializer {
 
-	struct MeshData;
+struct MeshData;
 
-	class MeshParserBase : public Parser {
-	public:
-		virtual ~MeshParserBase() = default;
+class MeshParserBase : public Parser {
+public:
+	virtual ~MeshParserBase() = default;
 
-		virtual bool parse(const std::string& path, MeshData& out) = 0;
-	};
+	virtual bool parse(const std::string& path, MeshData& out) = 0;
+};
 
 }

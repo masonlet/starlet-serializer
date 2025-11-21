@@ -4,19 +4,19 @@
 
 namespace Starlet::Serializer {
 
-	struct MeshData;
+struct MeshData;
 
-	class MeshParser : public Parser {
-	public:
-		bool parse(const std::string& path, MeshData& out);
+class MeshParser : public Parser {
+public:
+	bool parse(const std::string& path, MeshData& out);
 
-	private:
-		enum class MeshFormat {
-			PLY,
-			UNKNOWN
-		};
-
-		MeshFormat detectFormat(const std::string& path);
+private:
+	enum class MeshFormat {
+		PLY,
+		UNKNOWN
 	};
+
+	MeshFormat detectFormat(const std::string& path);
+};
 
 }

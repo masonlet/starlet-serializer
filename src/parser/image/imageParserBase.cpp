@@ -14,12 +14,12 @@ void ImageParserBase::clearImageData(ImageData& data) const {
 std::optional<std::vector<unsigned char>> ImageParserBase::loadImageData(const std::string& path) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path)) {
-		Logger::error("ImageParser", "loadImageData", std::string("Failed to load file: ") + path);
+		Logger::error("ImageParserBase", "loadImageData", std::string("Failed to load file: ") + path);
 		return std::nullopt;
 	}
 		
 	if (file.empty()) {
-		Logger::error("ImageParser", "loadImageData", "File is empty");
+		Logger::error("ImageParserBase", "loadImageData", "File is empty");
 		return std::nullopt;
 	}
 
@@ -27,11 +27,11 @@ std::optional<std::vector<unsigned char>> ImageParserBase::loadImageData(const s
 }
 
 bool ImageParserBase::validateDimensions(uint32_t width, uint32_t height) const {
-	if (width == 0)  return Logger::error("ImageParser", "validateDimensions", "Invalid width: " + std::to_string(width));
-	if (height == 0) return Logger::error("ImageParser", "validateDimensions", "Invalid height: " + std::to_string(height));
+	if (width == 0)  return Logger::error("ImageParserBase", "validateDimensions", "Invalid width: " + std::to_string(width));
+	if (height == 0) return Logger::error("ImageParserBase", "validateDimensions", "Invalid height: " + std::to_string(height));
 	constexpr size_t MAX_DIMENSION = 65536;
-	if (width > MAX_DIMENSION)  return Logger::error("ImageParser", "validateDimensions", "Width exceeds maximum: " + std::to_string(width));
-	if (height > MAX_DIMENSION) return Logger::error("ImageParser", "validateDimensions", "Height exceeds maximum: " + std::to_string(height));
+	if (width > MAX_DIMENSION)  return Logger::error("ImageParserBase", "validateDimensions", "Width exceeds maximum: " + std::to_string(width));
+	if (height > MAX_DIMENSION) return Logger::error("ImageParserBase", "validateDimensions", "Height exceeds maximum: " + std::to_string(height));
 	return true;
 }
 
