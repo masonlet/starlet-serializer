@@ -23,41 +23,75 @@ TEST(MeshParserTest, DetectFormatPlyLowercase) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
   createTestFile("test_data/model.ply", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.ply", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  // PLY extension was properly detected and routed to PlyParser
+  EXPECT_NE(output.find("PlyParser"), std::string::npos);
 }
 
 TEST(MeshParserTest, DetectFormatPlyUppercase) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
   createTestFile("test_data/model.PLY", "PLY\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.PLY", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  // PLY extension was properly detected and routed to PlyParser
+  EXPECT_NE(output.find("PlyParser"), std::string::npos);
 }
 
 TEST(MeshParserTest, DetectFormatPlyMixedCase) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
   createTestFile("test_data/model.PlY", "PlY\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.PlY", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  // PLY extension was properly detected and routed to PlyParser
+  EXPECT_NE(output.find("PlyParser"), std::string::npos);
 }
+
 
 // Edge cases
 TEST(MeshParserTest, DetectFormatNoExtension) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
   createTestFile("test_data/model", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  EXPECT_NE(output.find("Unsupported mesh format: test_data/model"), std::string::npos);
 }
 
 TEST(MeshParserTest, DetectFormatUnknownExtension) {
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
   createTestFile("test_data/model.unknown", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.unknown", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  EXPECT_NE(output.find("Unsupported mesh format: test_data/model.unknown"), std::string::npos);
 }
 
 TEST(MeshParserTest, DetectFormatEmptyExtension) {
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
+  SSerializer::MeshParser parser;
+  SSerializer::MeshData out;
   createTestFile("test_data/model.", "ply\n");
+
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.", out));
+  std::string output = testing::internal::GetCapturedStderr();
+
+  EXPECT_NE(output.find("Unsupported mesh format: test_data/model."), std::string::npos);
 }
