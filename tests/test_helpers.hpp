@@ -15,6 +15,12 @@ inline void createTestFile(const std::string& path, const std::string_view& cont
   std::ofstream file(path, std::ios::binary);
   file.write(content.data(), content.size());
 }
+inline void createBinaryFile(const std::string& path, const std::vector<unsigned char>& data) {
+  std::filesystem::path p(path);
+  std::filesystem::create_directories(p.parent_path());
+  std::ofstream file(path, std::ios::binary);
+  file.write(reinterpret_cast<const char*>(data.data()), data.size());
+}
 
 class ImageParserTest : public ::testing::Test {
 protected:

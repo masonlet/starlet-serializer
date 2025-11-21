@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "starlet-serializer/parser/parser.hpp"
+#include "test_helpers.hpp"
+
 #include "starlet-math/vec2.hpp"
 #include "starlet-math/vec3.hpp"
 #include "starlet-math/vec4.hpp"
@@ -10,23 +12,6 @@
 #include <filesystem>
 
 namespace SSerializer = Starlet::Serializer;
-
-namespace {
-  void createTestFile(const std::string& path, const std::string& content) {
-    std::filesystem::path p(path);
-    std::filesystem::create_directories(p.parent_path());
-    std::ofstream file(path);
-    file << content;
-  }
-
-  void createBinaryFile(const std::string& path, const std::vector<unsigned char>& data) {
-    std::filesystem::path p(path);
-    std::filesystem::create_directories(p.parent_path());
-    std::ofstream file(path, std::ios::binary);
-    file.write(reinterpret_cast<const char*>(data.data()), data.size());
-  }
-}
-
 
 // File Loading Tests
 TEST(ParserTest, LoadFileSuccess) {

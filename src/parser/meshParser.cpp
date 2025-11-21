@@ -15,7 +15,7 @@ bool MeshParser::parse(const std::string& path, MeshData& out) {
 		parser = std::make_unique<PlyParser>();
 		break;
 	default:
-		Logger::error("MeshParser", "parse", "Unsupported image format: " + path);
+		Logger::error("MeshParser", "parse", "Unsupported mesh format: " + path);
 		return false;
 	}
 
