@@ -46,6 +46,18 @@ protected:
 
 class MeshParserTest : public ::testing::Test {
 protected:
+  void expectValidParse(const std::string& fileName, uint32_t numVertices, uint32_t numTriangles) {
+    EXPECT_TRUE(parser.parse(fileName, out));
+    EXPECT_EQ(out.numVertices, numVertices);
+    EXPECT_EQ(out.numTriangles, numTriangles);
+    EXPECT_EQ(out.numIndices, numTriangles * 3);
+    EXPECT_EQ(out.indices.size(), out.numIndices);
+  }
+
+  void expectInvalidParse(const std::string& filename) {
+    EXPECT_FALSE(parser.parse(filename, out));
+  }
+
   SSerializer::MeshParser parser;
   SSerializer::MeshData out;
 };
