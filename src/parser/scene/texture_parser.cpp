@@ -1,5 +1,5 @@
-#include "starlet-serializer/parser/sceneParser.hpp"
-#include "starlet-serializer/data/textureData.hpp"
+#include "starlet-serializer/parser/scene_parser.hpp"
+#include "starlet-serializer/data/texture_data.hpp"
 
 namespace Starlet::Serializer {
 

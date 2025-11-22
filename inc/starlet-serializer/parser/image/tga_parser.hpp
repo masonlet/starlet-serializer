@@ -1,6 +1,6 @@
 #pragma once
 
-#include "starlet-serializer/parser/image/imageParserBase.hpp"
+#include "starlet-serializer/parser/image/image_parser_base.hpp"
 
 namespace Starlet::Serializer {
 

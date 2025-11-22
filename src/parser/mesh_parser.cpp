@@ -1,6 +1,6 @@
-#include "starlet-serializer/parser/meshParser.hpp"
+#include "starlet-serializer/parser/mesh_parser.hpp"
 
-#include "starlet-serializer/parser/mesh/plyParser.hpp"
+#include "starlet-serializer/parser/mesh/ply_parser.hpp"
 
 #include "starlet-logger/logger.hpp"
 

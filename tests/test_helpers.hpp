@@ -1,8 +1,11 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "starlet-serializer/parser/imageParser.hpp"
-#include "starlet-serializer/data/imageData.hpp"
+#include "starlet-serializer/parser/image_parser.hpp"
+#include "starlet-serializer/data/image_data.hpp"
+
+#include "starlet-serializer/parser/mesh_parser.hpp"
+#include "starlet-serializer/data/mesh_data.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -39,4 +42,22 @@ protected:
 
   SSerializer::ImageParser parser;
   SSerializer::ImageData out;
+};
+
+class MeshParserTest : public ::testing::Test {
+protected:
+  void expectValidParse(const std::string& fileName, uint32_t numVertices, uint32_t numTriangles) {
+    EXPECT_TRUE(parser.parse(fileName, out));
+    EXPECT_EQ(out.numVertices, numVertices);
+    EXPECT_EQ(out.numTriangles, numTriangles);
+    EXPECT_EQ(out.numIndices, numTriangles * 3);
+    EXPECT_EQ(out.indices.size(), out.numIndices);
+  }
+
+  void expectInvalidParse(const std::string& filename) {
+    EXPECT_FALSE(parser.parse(filename, out));
+  }
+
+  SSerializer::MeshParser parser;
+  SSerializer::MeshData out;
 };

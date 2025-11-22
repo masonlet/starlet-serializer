@@ -1,5 +1,5 @@
-#include "starlet-serializer/parser/image/imageParserBase.hpp"
-#include "starlet-serializer/data/imageData.hpp"
+#include "starlet-serializer/parser/image/image_parser_base.hpp"
+#include "starlet-serializer/data/image_data.hpp"
 
 #include "starlet-logger/logger.hpp"
 
