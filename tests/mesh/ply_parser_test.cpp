@@ -1,16 +1,9 @@
-#include <gtest/gtest.h>
-
-#include "starlet-serializer/parser/mesh_parser.hpp"
-#include "starlet-serializer/data/mesh_data.hpp"
 #include "../test_helpers.hpp"
 
-#include <filesystem>
-#include <fstream>
-
-namespace SSerializer = Starlet::Serializer;
+class PlyParserTest : public MeshParserTest {};
 
 // Valid PLY parsing tests
-TEST(PlyParserTest, ValidPlyMinimal) {
+TEST_F(PlyParserTest, ValidPlyMinimal) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -26,8 +19,6 @@ end_header
 3 0 1 2 
 )";
   createTestFile("test_data/minimal.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/minimal.ply", out));
   EXPECT_EQ(out.numVertices, 3);
   EXPECT_EQ(out.numTriangles, 1);
@@ -39,7 +30,7 @@ end_header
   EXPECT_FALSE(out.hasTexCoords);
 }
 
-TEST(PlyParserTest, ValidPlyWithNormals) {
+TEST_F(PlyParserTest, ValidPlyWithNormals) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -58,8 +49,6 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/normals.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/normals.ply", out));
   EXPECT_EQ(out.numVertices, 3);
   EXPECT_EQ(out.numTriangles, 1);
@@ -71,7 +60,7 @@ end_header
   EXPECT_FALSE(out.hasTexCoords);
 }
 
-TEST(PlyParserTest, ValidPlyWithColours) {
+TEST_F(PlyParserTest, ValidPlyWithColours) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -90,8 +79,6 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/colours.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/colours.ply", out));
   EXPECT_EQ(out.numVertices, 3);
   EXPECT_EQ(out.numTriangles, 1);
@@ -105,7 +92,7 @@ end_header
   EXPECT_FLOAT_EQ(out.vertices[0].col.z, 0.0f);
 }
 
-TEST(PlyParserTest, ValidPlyWithTexCoords) {
+TEST_F(PlyParserTest, ValidPlyWithTexCoords) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -123,8 +110,6 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/texcoords.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/texcoords.ply", out));
   EXPECT_EQ(out.numVertices, 3);
   EXPECT_EQ(out.numTriangles, 1);
@@ -138,7 +123,7 @@ end_header
   EXPECT_FLOAT_EQ(out.vertices[2].texCoord.y, 1.0f);
 }
 
-TEST(PlyParserTest, ValidPlyMultipleTriangles) {
+TEST_F(PlyParserTest, ValidPlyMultipleTriangles) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 4
@@ -156,8 +141,6 @@ end_header
 3 0 2 3
 )";
   createTestFile("test_data/quad.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/quad.ply", out));
   EXPECT_EQ(out.numVertices, 4);
   EXPECT_EQ(out.numTriangles, 2);
@@ -170,7 +153,7 @@ end_header
   EXPECT_EQ(out.indices[5], 3);
 }
 
-TEST(PlyParserTest, PlyExtremeFloatValues) {
+TEST_F(PlyParserTest, PlyExtremeFloatValues) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 2
@@ -185,14 +168,12 @@ end_header
 3 0 1 1
 )";
   createTestFile("test_data/extreme_float.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/extreme_float.ply", out));
   EXPECT_FLOAT_EQ(out.vertices[0].pos.x, 1e38f);
   EXPECT_FLOAT_EQ(out.vertices[1].pos.x, -1e38f);
 }
 
-TEST(PlyParserTest, LargePly) {
+TEST_F(PlyParserTest, LargePly) {
   const int NUM = 100000;
   std::ofstream file("test_data/large.ply");
   file << "ply\nformat ascii 1.0\nelement vertex " << NUM << "\n"
@@ -202,14 +183,12 @@ TEST(PlyParserTest, LargePly) {
   for (int i = 0; i < NUM - 2; i++) file << "3 " << i << " " << (i + 1) << " " << (i + 2) << "\n";
   file.close();
 
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/large.ply", out));
   EXPECT_EQ(out.numVertices, NUM);
   EXPECT_EQ(out.numTriangles, NUM - 2);
 }
 
-TEST(PlyParserTest, PartialNormalsNotCounted) {
+TEST_F(PlyParserTest, PartialNormalsNotCounted) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -225,13 +204,11 @@ end_header
 3 0 0 0
 )";
   createTestFile("test_data/partial_normals.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/partial_normals.ply", out));
   EXPECT_FALSE(out.hasNormals);
 }
 
-TEST(PlyParserTest, AcceptAlternatePropertyNames) {
+TEST_F(PlyParserTest, AcceptAlternatePropertyNames) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -250,14 +227,12 @@ end_header
 3 0 0 0
 )";
   createTestFile("test_data/alt_names.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/alt_names.ply", out));
   EXPECT_TRUE(out.hasNormals);
   EXPECT_TRUE(out.hasTexCoords);
 }
 
-TEST(PlyParserTest, FloatColourParsing) {
+TEST_F(PlyParserTest, FloatColourParsing) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -274,8 +249,6 @@ end_header
 3 0 0 0
 )";
   createTestFile("test_data/float_colours.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/float_colours.ply", out));
   EXPECT_TRUE(out.hasColours);
   EXPECT_FLOAT_EQ(out.vertices[0].col.x, 0.5f);
@@ -283,7 +256,7 @@ end_header
   EXPECT_FLOAT_EQ(out.vertices[0].col.z, 1.0f);
 }
 
-TEST(PlyParserTest, UcharColourWithAlpha) {
+TEST_F(PlyParserTest, UcharColourWithAlpha) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -301,14 +274,12 @@ end_header
 3 0 0 0
 )";
   createTestFile("test_data/uchar_alpha.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/uchar_alpha.ply", out));
   EXPECT_TRUE(out.hasColours);
   EXPECT_FLOAT_EQ(out.vertices[0].col.w, 128.0f / 255.0f);
 }
 
-TEST(PlyParserTest, PlyExtraVertexProperties) {
+TEST_F(PlyParserTest, PlyExtraVertexProperties) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 2
@@ -327,13 +298,11 @@ end_header
 3 0 1 0
 )";
   createTestFile("test_data/extra_props.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/extra_props.ply", out));
   EXPECT_EQ(out.numVertices, 2);
 }
 
-TEST(PlyParserTest, PlyVertexPositionBounds) {
+TEST_F(PlyParserTest, PlyVertexPositionBounds) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -349,14 +318,12 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/bounds.ply", plyContent);
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/bounds.ply", out));
   EXPECT_FLOAT_EQ(out.minY, -5.0f);
   EXPECT_FLOAT_EQ(out.maxY, 10.0f);
 }
 
-TEST(PlyParserTest, HandlesWhitespaceBetweenSections) {
+TEST_F(PlyParserTest, HandlesWhitespaceBetweenSections) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 2
@@ -374,12 +341,10 @@ end_header
 3 0 1 0
 )";
   createTestFile("test_data/whitespace.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/whitespace.ply", out));
 }
 
-TEST(PlyParserTest, SupportsComments) {
+TEST_F(PlyParserTest, SupportsComments) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 comment created by test
@@ -394,12 +359,10 @@ end_header
 3 0 0 0
 )";
   createTestFile("test_data/comments.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/comments.ply", out));
 }
 
-TEST(PlyParserTest, ExtraFacePropertiesIgnored) {
+TEST_F(PlyParserTest, ExtraFacePropertiesIgnored) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 3
@@ -416,28 +379,22 @@ end_header
 3 0 1 2 42.0
 )";
   createTestFile("test_data/extra_face_props.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_TRUE(parser.parse("test_data/extra_face_props.ply", out));
 }
 
 
 // Error tests
-TEST(PlyParserTest, PlyEmpty) {
+TEST_F(PlyParserTest, PlyEmpty) {
   createTestFile("test_data/empty.ply", "");
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/empty.ply", out));
 }
 
-TEST(PlyParserTest, PlyNoHeader) {
+TEST_F(PlyParserTest, PlyNoHeader) {
   createTestFile("test_data/noheader.ply", "0.0 0.0 0.0\n");
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/noheader.ply", out));
 }
 
-TEST(PlyParserTest, PlyZeroVertices) {
+TEST_F(PlyParserTest, PlyZeroVertices) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 0
@@ -445,12 +402,10 @@ element face 0
 end_header
 )";
   createTestFile("test_data/zero.ply", plyContent);
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/zero.ply", out));
 }
 
-TEST(PlyParserTest, PlyZeroFaces) {
+TEST_F(PlyParserTest, PlyZeroFaces) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -464,12 +419,10 @@ end_header
 0 1 0
 )";
   createTestFile("test_data/nofaces.ply", plyContent);
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/nofaces.ply", out));
 }
 
-TEST(PlyParserTest, PlyInvalidFloat) {
+TEST_F(PlyParserTest, PlyInvalidFloat) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 1
@@ -481,12 +434,10 @@ end_header
 a b c
 )";
   createTestFile("test_data/invalid_float.ply", plyContent);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/invalid_float.ply", out));
 }
 
-TEST(PlyParserTest, PlyMissingEndHeader) {
+TEST_F(PlyParserTest, PlyMissingEndHeader) {
   const std::string_view plyContent = R"(ply
 format ascii 1.0
 element vertex 3
@@ -496,18 +447,14 @@ property float z
 0.0 0.0 0.0
 )";
   createTestFile("test_data/noend.ply", plyContent);
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/noend.ply", out));
 }
 
-TEST(PlyParserTest, PlyNonexistentFile) {
-  Starlet::Serializer::MeshParser parser;
-  Starlet::Serializer::MeshData out;
+TEST_F(PlyParserTest, PlyNonexistentFile) {
   EXPECT_FALSE(parser.parse("test_data/nonexistent.ply", out));
 }
 
-TEST(PlyParserTest, PlyFewerVerticesThanDeclared) {
+TEST_F(PlyParserTest, PlyFewerVerticesThanDeclared) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 3
@@ -521,12 +468,10 @@ end_header
 1 0 0
 )";
   createTestFile("test_data/fewer_verts.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/fewer_verts.ply", out));
 }
 
-TEST(PlyParserTest, PlyFewerFacesThanDeclared) {
+TEST_F(PlyParserTest, PlyFewerFacesThanDeclared) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 3
@@ -542,12 +487,10 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/fewer_faces.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/fewer_faces.ply", out));
 }
 
-TEST(PlyParserTest, PlyInvalidVertexIndex) {
+TEST_F(PlyParserTest, PlyInvalidVertexIndex) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 2
@@ -562,12 +505,10 @@ end_header
 3 0 1 5
 )";
   createTestFile("test_data/invalid_index.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/invalid_index.ply", out));
 }
 
-TEST(PlyParserTest, RejectNonTriangleFace) {
+TEST_F(PlyParserTest, RejectNonTriangleFace) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 4
@@ -584,12 +525,10 @@ end_header
 4 0 1 2 3
 )";
   createTestFile("test_data/quad_face.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/quad_face.ply", out));
 }
 
-TEST(PlyParserTest, RejectFaceWithZeroIndices) {
+TEST_F(PlyParserTest, RejectFaceWithZeroIndices) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -603,12 +542,10 @@ end_header
 0
 )";
   createTestFile("test_data/zero_face.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/zero_face.ply", out));
 }
 
-TEST(PlyParserTest, RejectFaceWithOneIndex) {
+TEST_F(PlyParserTest, RejectFaceWithOneIndex) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 1
@@ -622,12 +559,10 @@ end_header
 1 0
 )";
   createTestFile("test_data/one_face.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/one_face.ply", out));
 }
 
-TEST(PlyParserTest, RejectIncompleteVertexData) {
+TEST_F(PlyParserTest, RejectIncompleteVertexData) {
   const std::string_view ply = R"(ply
 format ascii 1.0
 element vertex 2
@@ -641,7 +576,5 @@ end_header
 1 0
 )";
   createTestFile("test_data/incomplete_vertex.ply", ply);
-  SSerializer::MeshParser parser;
-  SSerializer::MeshData out;
   EXPECT_FALSE(parser.parse("test_data/incomplete_vertex.ply", out));
 }

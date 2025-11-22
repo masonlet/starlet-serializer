@@ -1,11 +1,4 @@
-#include <gtest/gtest.h>
-
 #include "test_helpers.hpp"
-
-#include <filesystem>
-#include <fstream>
-
-namespace SSerializer = Starlet::Serializer;
 
 // BMP format detection
 TEST_F(ImageParserTest, DetectFormatBmpLowercase) {

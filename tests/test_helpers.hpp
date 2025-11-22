@@ -4,6 +4,9 @@
 #include "starlet-serializer/parser/image_parser.hpp"
 #include "starlet-serializer/data/image_data.hpp"
 
+#include "starlet-serializer/parser/mesh_parser.hpp"
+#include "starlet-serializer/data/mesh_data.hpp"
+
 #include <filesystem>
 #include <fstream>
 
@@ -39,4 +42,10 @@ protected:
 
   SSerializer::ImageParser parser;
   SSerializer::ImageData out;
+};
+
+class MeshParserTest : public ::testing::Test {
+protected:
+  SSerializer::MeshParser parser;
+  SSerializer::MeshData out;
 };
