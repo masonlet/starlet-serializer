@@ -1,6 +1,6 @@
-#include "starlet-serializer/parser/sceneParser.hpp"
+#include "starlet-serializer/parser/scene_parser.hpp"
 
-#include "starlet-serializer/data/gridData.hpp"
+#include "starlet-serializer/data/grid_data.hpp"
 
 namespace Starlet::Serializer {
 

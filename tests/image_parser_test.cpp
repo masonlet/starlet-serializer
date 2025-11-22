@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "starlet-serializer/parser/imageParser.hpp"
-#include "starlet-serializer/data/imageData.hpp"
 #include "test_helpers.hpp"
 
 #include <filesystem>

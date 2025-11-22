@@ -1,5 +1,5 @@
-#include "starlet-serializer/parser/sceneParser.hpp"
-#include "starlet-serializer/data/sceneData.hpp"
+#include "starlet-serializer/parser/scene_parser.hpp"
+#include "starlet-serializer/data/scene_data.hpp"
 
 #include "starlet-logger/logger.hpp"
 

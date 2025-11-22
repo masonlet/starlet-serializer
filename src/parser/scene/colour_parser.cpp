@@ -1,4 +1,4 @@
-#include "starlet-serializer/parser/sceneParser.hpp"
+#include "starlet-serializer/parser/scene_parser.hpp"
 
 #include "starlet-math/vec4.hpp"
 

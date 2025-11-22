@@ -1,5 +1,5 @@
-#include "starlet-serializer/parser/image/tgaParser.hpp"
-#include "starlet-serializer/data/imageData.hpp"
+#include "starlet-serializer/parser/image/tga_parser.hpp"
+#include "starlet-serializer/data/image_data.hpp"
 
 #include "starlet-logger/logger.hpp"
 

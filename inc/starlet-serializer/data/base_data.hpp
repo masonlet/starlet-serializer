@@ -1,7 +1,7 @@
 #pragma once
 
-#include "colourData.hpp"
-#include "transformData.hpp"
+#include "colour_data.hpp"
+#include "transform_data.hpp"
 
 namespace Starlet::Serializer {
 

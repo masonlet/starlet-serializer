@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data.hpp"
+#include "base_data.hpp"
 
 #include "starlet-math/vec3.hpp"
 

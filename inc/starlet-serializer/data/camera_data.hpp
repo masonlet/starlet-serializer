@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data.hpp"
+#include "base_data.hpp"
 
 namespace Starlet::Serializer {
 

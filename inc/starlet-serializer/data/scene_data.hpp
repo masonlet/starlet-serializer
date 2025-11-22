@@ -2,13 +2,13 @@
 
 #include <vector>
 
-#include "modelData.hpp"
-#include "lightData.hpp"
-#include "cameraData.hpp"
-#include "primitiveData.hpp"
-#include "gridData.hpp"
-#include "textureData.hpp"
-#include "velocityData.hpp"
+#include "model_data.hpp"
+#include "light_data.hpp"
+#include "camera_data.hpp"
+#include "primitive_data.hpp"
+#include "grid_data.hpp"
+#include "texture_data.hpp"
+#include "velocity_data.hpp"
 
 #include "starlet-math/vec3.hpp"
 

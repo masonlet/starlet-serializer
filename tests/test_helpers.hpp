@@ -1,8 +1,8 @@
 #pragma once
 #include <gtest/gtest.h>
 
-#include "starlet-serializer/parser/imageParser.hpp"
-#include "starlet-serializer/data/imageData.hpp"
+#include "starlet-serializer/parser/image_parser.hpp"
+#include "starlet-serializer/data/image_data.hpp"
 
 #include <filesystem>
 #include <fstream>

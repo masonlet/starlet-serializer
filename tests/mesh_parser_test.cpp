@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "starlet-serializer/parser/meshParser.hpp"
-#include "starlet-serializer/data/meshData.hpp"
+#include "starlet-serializer/parser/mesh_parser.hpp"
+#include "starlet-serializer/data/mesh_data.hpp"
 #include "test_helpers.hpp"
 
 #include <filesystem>
