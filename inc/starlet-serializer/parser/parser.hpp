@@ -19,7 +19,9 @@ namespace Serializer {
 #define STARLET_PARSE_OR(onFail, parser, target, errorMsg) \
 do { \
 	if (!(parser(p, target))) { \
-			if((errorMsg) && *(errorMsg) != '\0') fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
+			if((errorMsg) && *(errorMsg) != '\0') { \
+				fprintf(stderr, "[Parser ERROR]: Failed to parse %s\n", errorMsg); \
+			} \
 			onFail; \
 	} \
 } while(0)
