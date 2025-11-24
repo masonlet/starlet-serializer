@@ -40,6 +40,12 @@ bool SceneParser::parseLightType(const unsigned char*& p, LightType& type) {
 bool SceneParser::parseLight(const unsigned char*& p, LightData& light) {
 	STARLET_PARSE_OR(return false, parseBool, light.enabled, "light enabled");
 	STARLET_PARSE_STRING_OR(return false, p, light.name, 64, "light name");
+	if (strcmp(light.name.c_str(), "Point") == 0 || 
+		  strcmp(light.name.c_str(), "Spot") == 0 || 
+		  strcmp(light.name.c_str(), "Directional") == 0
+		) return Logger::error("SceneParser", "parseLight", "Invalid light name: cannot be a light type");
+	if (light.name[0] >= '0' && light.name[0] <= '9')
+		return Logger::error("SceneParser", "parseLight", "Invalid light name: cannot start with a digit");
 	STARLET_PARSE_OR(return false, parseLightType, light.type, "light type");
 	STARLET_PARSE_OR(return false, parseVec3f, light.transform.pos, "light position");
 	STARLET_PARSE_OR(return false, parseVec3f, light.transform.rot, "light direction");
