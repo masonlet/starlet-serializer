@@ -18,16 +18,16 @@ namespace {
 
 bool PlyParser::parse(const std::string& path, MeshData& out) {
 	std::vector<unsigned char> file;
-	if (!loadBinaryFile(file, path))
-		return false;
+	if (!loadBinaryFile(file, path)) return false;
 
-	if (file.empty()) return Logger::error("PlyParser", "parse", "Input pointer is null\n");
+	if (file.empty() || file[0] == '\0')
+		return Logger::error("PlyParser", "parse", "File is empty");
 
 	const unsigned char* p = file.data();
 	std::string errorMsg;
 	while (true) {
 		if (!parseHeaderLine(p, out.numVertices, out.numTriangles, out.hasNormals, out.hasColours, out.hasTexCoords)) {
-			errorMsg = "header or missing 'end_header'";
+			errorMsg = "header, 'end_header' not found";
 			break;
 		}
 
@@ -55,16 +55,17 @@ bool PlyParser::parse(const std::string& path, MeshData& out) {
 	out.indices.clear();
 	out.vertices.clear();
 	out.numVertices = out.numIndices = out.numTriangles = 0;
-	return Logger::error("PlyParser", "parse", ("Failed to parse " + errorMsg + '\n').c_str());
+	return Logger::error("PlyParser", "parse", ("Failed to parse " + errorMsg).c_str());
 }
 
 bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVerticesOut, unsigned int& numTrianglesOut, bool& hasNormalsOut, bool& hasColoursOut, bool& hasTexCoordsOut) {
-	if (!p) return Logger::error("PlyParser", "parseHeaderLine", "Input pointer is null\n");
+	if (!p) return Logger::error("PlyParser", "parseHeaderLine", "Input pointer is null");
 	p = skipWhitespace(p);
 
 	bool hasNx = false, hasNy = false, hasNz = false;
 	bool hasRed = false, hasGreen = false, hasBlue = false;
 	bool hasU = false, hasV = false;
+
 	while (*p) {
 		const unsigned char* nextLine = skipToNextLine(p);
 		const unsigned char* lineEnd = trimEOL(p, nextLine);
@@ -97,11 +98,11 @@ bool PlyParser::parseHeaderLine(const unsigned char*& p, unsigned int& numVertic
 		p = nextLine;
 	}
 
-	return Logger::error("plyParser", "parseHeaderLine", "Failed, end of buffer reached");
+	return false;
 }
 
 bool PlyParser::parseElementLine(const unsigned char*& p, unsigned int& verticesOut, unsigned int& trianglesOut) {
-	if (!p) return Logger::error("PlyParser", "parseElementLine", "Input pointer is null\n");
+	if (!p) return Logger::error("PlyParser", "parseElementLine", "Input pointer is null");
 
 	p = skipWhitespace(p += 7);
 	if (strncmp((const char*)p, "vertex", 6) == 0 && (p[6] == ' ' || p[6] == '\t')) {
@@ -115,47 +116,44 @@ bool PlyParser::parseElementLine(const unsigned char*& p, unsigned int& vertices
 	return false;
 }
 bool PlyParser::parsePropertyLine(const unsigned char*& p, bool& hasNx, bool& hasNy, bool& hasNz, bool& hasR, bool& hasG, bool& hasB, bool& hasU, bool& hasV) {
-	if (!p) return Logger::error("PlyParser", "parsePropertyLine", "Input pointer is null\n");
+	if (!p) return Logger::error("PlyParser", "parsePropertyLine", "Input pointer is null");
 	p = skipWhitespace(p += 8);
 
 	char type[32]{};
 	if (!parseToken(p, (unsigned char*)type, sizeof(type)))
-		return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property type :" + std::string(type));
+		return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property type: " + std::string(type));
 
 	if (strcmp(type, "list") == 0) {
-		/*
-			1 = Count Type
-			2 = Value Type
-			3 = Property Name
-		*/
-		char property[3][32]{};
-		for (int i = 0; i < 3; ++i)
-			if (!parseToken(p, reinterpret_cast<unsigned char*>(property[i]), sizeof(property[i])))
-				return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property list type, number: " + std::to_string(i));
-
+		char countType[32]{}, valueType[32]{}, propertyName[32]{};
+		if (!parseToken(p, reinterpret_cast<unsigned char*>(countType), sizeof(countType)))
+			return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property list: count type");
+		if (!parseToken(p, reinterpret_cast<unsigned char*>(valueType), sizeof(valueType)))
+			return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property list: value type");
+		if (!parseToken(p, reinterpret_cast<unsigned char*>(propertyName), sizeof(propertyName)))
+			return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property list: property name");
 		return true;
 	}
 
 	char propertyName[32]{};
 	if (!parseToken(p, (unsigned char*)propertyName, sizeof(propertyName)))
-		return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property name :" + std::string(propertyName));
+		return Logger::error("PlyParser", "parsePropertyLine", "Failed to parse property name: " + std::string(propertyName));
 
-	if (strcmp(propertyName, "nx") == 0 || strcmp(propertyName, "normal_x") == 0) hasNx = true;
+	if      (strcmp(propertyName, "nx") == 0 || strcmp(propertyName, "normal_x") == 0) hasNx = true;
 	else if (strcmp(propertyName, "ny") == 0 || strcmp(propertyName, "normal_y") == 0) hasNy = true;
 	else if (strcmp(propertyName, "nz") == 0 || strcmp(propertyName, "normal_z") == 0) hasNz = true;
-	else if (strcmp(propertyName, "red") == 0) hasR = true;
+	else if (strcmp(propertyName, "red") == 0)   hasR = true;
 	else if (strcmp(propertyName, "green") == 0) hasG = true;
-	else if (strcmp(propertyName, "blue") == 0) hasB = true;
+	else if (strcmp(propertyName, "blue") == 0)  hasB = true;
 	else if (strcmp(propertyName, "u") == 0 || strcmp(propertyName, "texture_u") == 0) hasU = true;
 	else if (strcmp(propertyName, "v") == 0 || strcmp(propertyName, "texture_v") == 0) hasV = true;
 	return true;
 }
 
 bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
-	if (!p) return Logger::error("PlyParser", "parseVertices", "Input pointer is null\n");
-	if (!out.numVertices) return Logger::error("PlyParser", "parseVertices", "No vertices declared in header\n");
+	if (!p) return Logger::error("PlyParser", "parseVertices", "Input pointer is null");
+	if (!out.numVertices) return Logger::error("PlyParser", "parseVertices", "No vertices declared in header");
 
-	float minY = FLT_MAX, maxY = -FLT_MAX;
+	float minY = FLT_MAX, maxY = -FLT_MAX;	
 	unsigned int i = 0;
 	while (i < out.numVertices && *p) {
 		Math::Vertex& v = out.vertices[i];
@@ -167,83 +165,54 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 			continue;
 		}
 
-		if (*p == '\0') return false;
+		if (*p == '\0') return Logger::error("PlyParser", "parseVertices", "Unexpected end of data");
 
-		bool valid = true;
-		while (valid) {
-			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.x, "Failed to parse position X");
-			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.y, "Failed to parse position Y");
-			STARLET_PARSE_OR(valid = false, parseFloat, v.pos.z, "Failed to parse position Z");
-			break;
-		}
-		if (!valid) {
-			p = nextLine;
-			continue;
-		}
+		if (!parseFloat(p, v.pos.x))
+			return Logger::error("PlyParser", "parseVertices", "Failed to parse position X at vertex " + std::to_string(i));
+		if (!parseFloat(p, v.pos.y))
+			return Logger::error("PlyParser", "parseVertices", "Failed to parse position Y at vertex " + std::to_string(i));
+		if (!parseFloat(p, v.pos.z))
+			return Logger::error("PlyParser", "parseVertices", "Failed to parse position Z at vertex " + std::to_string(i));
 
 		if (out.hasNormals) {
-			while (valid) {
-				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.x, "Failed to parse normal X");
-				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.y, "Failed to parse normal Y");
-				STARLET_PARSE_OR(valid = false, parseFloat, v.norm.z, "Failed to parse normal Z");
-				break;
-			}
-
-			if (!valid) {
-				p = nextLine;
-				continue;
-			}
+			if (!parseFloat(p, v.norm.x))
+				return Logger::error("PlyParser", "parseVertices", "Failed to parse normal X at vertex " + std::to_string(i));
+			if (!parseFloat(p, v.norm.y))
+				return Logger::error("PlyParser", "parseVertices", "Failed to parse normal Y at vertex " + std::to_string(i));
+			if (!parseFloat(p, v.norm.z))
+				return Logger::error("PlyParser", "parseVertices", "Failed to parse normal Z at vertex " + std::to_string(i));
 		}
 
 		if (out.hasColours) {
-			if (*p != '\0') {
-				Math::Vec3 colour = { 1.0f, 1.0f, 1.0f };
-				const unsigned char* original = p;
-				while (valid) {
-					STARLET_PARSE_OR(valid = false, parseFloat, colour.r, "Failed to parse float colour R");
-					STARLET_PARSE_OR(valid = false, parseFloat, colour.g, "Failed to parse float colour G");
-					STARLET_PARSE_OR(valid = false, parseFloat, colour.b, "Failed to parse float colour B");
-					break;
-				}
+			const unsigned char* original = p;
+			Math::Vec3 colour = { 1.0f, 1.0f, 1.0f };
 
-				if (valid &&
-					colour.x >= 0.0f && colour.x <= 1.0f &&
-					colour.y >= 0.0f && colour.y <= 1.0f &&
-					colour.z >= 0.0f && colour.z <= 1.0f) {
-					v.col = Math::Vec4{ colour.x, colour.y, colour.z, 1.0f };
-					out.hasColours = true;
-				}
-				else {
-					p = original;
-					unsigned int ri = 0, gi = 0, bi = 0, ai = 256;
+			if (parseFloat(p, colour.r) && 
+					parseFloat(p, colour.g) && 
+					parseFloat(p, colour.b) &&
+					colour.r <= 1.0f && colour.g <= 1.0f && colour.b <= 1.0f) {
+				v.col = Math::Vec4{ colour.r, colour.g, colour.b, 1.0f };
+			} else {
+				p = original;
+				unsigned int ri = 0, gi = 0, bi = 0, ai = 256;
 
-					valid = true;
-					while (valid) {
-						STARLET_PARSE_OR(valid = false, parseUInt, ri, "");
-						STARLET_PARSE_OR(valid = false, parseUInt, gi, "");
-						STARLET_PARSE_OR(valid = false, parseUInt, bi, "");
-						break;
-					}
-					if (!parseUInt(p, ai)) ai = 255;
+				if (!parseUInt(p, ri) || !parseUInt(p, gi) || !parseUInt(p, bi))
+					return Logger::error("PlyParser", "parseVertices", "Failed to parse colour at vertex " + std::to_string(i));
+				if (ri > 255 || gi > 255 || bi > 255)
+					return Logger::error("PlyParser", "parseVertices", "Colour out of range at vertex " + std::to_string(i));
 
-					if (valid && ri <= 255 && gi <= 255 && bi <= 255) {
-						v.col = Math::Vec4{
-								static_cast<float>(ri) / 255.0f,
-								static_cast<float>(gi) / 255.0f,
-								static_cast<float>(bi) / 255.0f,
-								static_cast<float>(ai) / 255.0f
-						};
-					}
-				}
+				parseUInt(p, ai);
+				if (ai > 255) ai = 255;
+
+				v.col = Math::Vec4{ ri / 255.0f, gi / 255.0f, bi / 255.0f, ai / 255.0f };
 			}
 		}
 
 		if (out.hasTexCoords) {
-			while (valid) {
-				STARLET_PARSE_OR(valid = false, parseFloat, v.texCoord.x, "Failed to parse texcoord U");
-				STARLET_PARSE_OR(valid = false, parseFloat, v.texCoord.y, "Failed to parse texcoord V");
-				break;
-			}
+			if (!parseFloat(p, v.texCoord.x))
+				return Logger::error("PlyParser", "parseVertices", "Failed to parse texCoord X at vertex " + std::to_string(i));
+			if (!parseFloat(p, v.texCoord.y))
+				return Logger::error("PlyParser", "parseVertices", "Failed to parse texCoord Y at vertex " + std::to_string(i));
 		}
 
 		if (v.pos.y < minY) minY = v.pos.y;
@@ -262,10 +231,13 @@ bool PlyParser::parseVertices(const unsigned char*& p, MeshData& out) {
 }
 bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 	if (!p) return Logger::error("PlyParser", "parseIndices", "Input pointer is null");
-	if (out.indices.empty() || out.numIndices == 0) return Logger::error("PlyParser", "parseIndices", "Index buffer not allocated");
+	if (out.indices.empty() || out.numIndices == 0) 
+		return Logger::error("PlyParser", "parseIndices", "Index buffer not allocated");
 
-	unsigned int triangleIndex = 0;
-	while (triangleIndex < out.numTriangles && *p) {
+	unsigned int i = 0;
+	while (i < out.numTriangles) {
+		if (!p || *p == '\0') break;
+
 		const unsigned char* nextLine = skipToNextLine(p);
 		const unsigned char* lineEnd = trimEOL(p, nextLine);
 
@@ -276,40 +248,31 @@ bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 
 		unsigned int count = 0;
 		if (!parseUInt(p, count)) {
-			p = nextLine;
-			continue;
+			if (*p == '\0') break;
+			return Logger::error("PlyParser", "parseIndices", "Failed to parse face vertex count at triangle " + std::to_string(i));
 		}
 
-		if (count != 3) {
-			p = nextLine;
-			continue;
-		}
+		if (count != 3)
+			return Logger::error("PlyParser", "parseIndices", "Non-triangle face detected (vertex count: " + std::to_string(count) + ") at triangle " + std::to_string(i));
 
 		unsigned int i0{ 0 }, i1{ 0 }, i2{ 0 };
-		bool valid = true;
-		while (valid) {
-			STARLET_PARSE_OR(valid = false, parseUInt, i0, "Failed to parse index 1");
-			STARLET_PARSE_OR(valid = false, parseUInt, i1, "Failed to parse index 2");
-			STARLET_PARSE_OR(valid = false, parseUInt, i2, "Failed to parse index 3");
-			break;
-		}
+		if (!parseUInt(p, i0) || !parseUInt(p, i1) || !parseUInt(p, i2))
+			return Logger::error("PlyParser", "parseIndices", "Failed to parse face indices at triangle " + std::to_string(i));
 
-		if (valid) {
-			if (i0 >= out.numVertices || i1 >= out.numVertices || i2 >= out.numVertices) 
-				return Logger::error("PlyParser", "parseIndices", "Index out of bounds: face references vertex >= " + std::to_string(out.numVertices));
-			
-			unsigned int base = triangleIndex * 3;
-			out.indices[static_cast<size_t>(base) + 0] = i0;
-			out.indices[static_cast<size_t>(base) + 1] = i1;
-			out.indices[static_cast<size_t>(base) + 2] = i2;
-			++triangleIndex;
-		}
+		if (i0 >= out.numVertices || i1 >= out.numVertices || i2 >= out.numVertices)
+			return Logger::error("PlyParser", "parseIndices", "Index out of bounds at triangle " + std::to_string(i));
+
+		size_t base = static_cast<size_t>(i) * 3;
+		out.indices[base + 0] = i0;
+		out.indices[base + 1] = i1;
+		out.indices[base + 2] = i2;
+		++i;
 
 		p = nextLine;
 	}
 
-	if (triangleIndex != out.numTriangles) 
-		return Logger::error("PlyParser", "parseIndices", "Face count declared: " + std::to_string(out.numTriangles) +	" but parsed: " + std::to_string(triangleIndex));
+	if (i != out.numTriangles) 
+		return Logger::error("PlyParser", "parseIndices", "Face count declared: " + std::to_string(out.numTriangles) +	" but parsed: " + std::to_string(i));
 
 	return true;
 }

@@ -13,10 +13,7 @@ void ImageParserBase::clearImageData(ImageData& data) const {
 
 std::optional<std::vector<unsigned char>> ImageParserBase::loadImageData(const std::string& path) {
 	std::vector<unsigned char> file;
-	if (!loadBinaryFile(file, path)) {
-		Logger::error("ImageParserBase", "loadImageData", std::string("Failed to load file: ") + path);
-		return std::nullopt;
-	}
+	if (!loadBinaryFile(file, path)) return std::nullopt;
 		
 	if (file.empty()) {
 		Logger::error("ImageParserBase", "loadImageData", "File is empty");

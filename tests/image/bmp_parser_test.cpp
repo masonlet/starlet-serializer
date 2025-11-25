@@ -105,9 +105,9 @@ TEST_F(BmpParserTest, CorrectPaddingWithGarbage) {
     .setPixel(0, 1, 255, 0, 0)
     .setPixel(1, 1, 255, 255, 255)
     .build();
-
   bmp[60] = 0xFF; bmp[61] = 0xAA; // Padding after first row
   bmp[68] = 0xFF; bmp[69] = 0xBB; // Padding after second row
+
   createTestFile("test_data/padding_garbage.bmp", bmp);
   expectValidParse("test_data/padding_garbage.bmp", 2, 2);
 
@@ -199,7 +199,6 @@ TEST_F(BmpParserTest, OddWidthLargePaddingCheck) {
 
 TEST_F(BmpParserTest, HeaderFileSizeTooSmall) {
   std::string bmp = BmpBuilder(2, 2).setFileSize(60).build();
-
   createTestFile("test_data/header_size_mismatch.bmp", bmp);
   expectValidParse("test_data/header_size_mismatch.bmp", 2, 2); // Should succeed using actual file size
 }
@@ -223,85 +222,121 @@ TEST_F(BmpParserTest, OneByOneImage) {
 TEST_F(BmpParserTest, FileTooSmall) {
   std::string bmp(20, '\0'); // Less than 54 bytes
   bmp[0] = 'B'; bmp[1] = 'M';
-
   createTestFile("test_data/too_small.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/too_small.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("File too small: 21 bytes"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, InvalidSignature) {
   std::string bmp = BmpBuilder(2, 2).corruptSignature().build();
-
   createTestFile("test_data/bad_sig.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_sig.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Bad signature (not BM)"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, InvalidDataOffset) {
   std::string bmp = BmpBuilder(2, 2).setDataOffset(10000).build();
-
   createTestFile("test_data/bad_offset.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_offset.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid data offset: 10000"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, UnsupportedDIBHeader) {
   std::string bmp = BmpBuilder(2, 2).setDibHeaderSize(12).build();
-
   createTestFile("test_data/bad_dib.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_dib.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Unsupported DIB header size: 12"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, InvalidColourPlanes) {
   std::string bmp = BmpBuilder(2, 2).setPlanes(2).build();
-
   createTestFile("test_data/bad_planes.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_planes.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Planes != 1: 2"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, UnsupportedBitsPerPixel) {
   std::string bmp = BmpBuilder(2, 2).setBpp(32).build();
-
   createTestFile("test_data/bad_bpp.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_bpp.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Only 24bpp supported: 32"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, CompressedBMP) {
   std::string bmp = BmpBuilder(2, 2).setCompression(1).build();
-
   createTestFile("test_data/compressed.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/compressed.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Compressed BMP not supported: 1"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, InsufficientPixelData) {
   std::string bmp = BmpBuilder(2, 2).build();
   bmp.resize(60);
-
   createTestFile("test_data/truncated.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/truncated.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("File too small for declared dimensions: 61 bytes, need 70 bytes"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, ZeroWidth) {
   std::string bmp = BmpBuilder(2, 2).build();
   *reinterpret_cast<uint32_t*>(&bmp[18]) = 0;
-
   createTestFile("test_data/zero_width.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero_width.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid width: 0"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, ZeroHeight) {
   std::string bmp = BmpBuilder(2, 2).build();
   *reinterpret_cast<int32_t*>(&bmp[22]) = 0;
-
   createTestFile("test_data/zero_height.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero_height.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid height: 0"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, FileNotFound) {
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/nonexistent.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent.bmp"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, DataOffsetEqualsFileSize) {
   std::string bmp = BmpBuilder(1, 1).setDataOffset(54).build();
   bmp.resize(54);
-
   createTestFile("test_data/offset_at_end.bmp", bmp);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/offset_at_end.bmp");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid data offset: 54"), std::string::npos);
 }

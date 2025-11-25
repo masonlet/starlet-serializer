@@ -33,7 +33,10 @@ TEST(ParserTest, LoadFileEmpty) {
 TEST(ParserTest, LoadFileNonexistent) {
   SSerializer::Parser parser;
   std::string out;
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.loadFile(out, "test_data/nonexistent.txt"));
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent.txt"), std::string::npos);
 }
 
 TEST(ParserTest, LoadBinaryFileSuccess) {
@@ -42,6 +45,7 @@ TEST(ParserTest, LoadBinaryFileSuccess) {
   SSerializer::Parser parser;
   std::vector<unsigned char> out;
   EXPECT_TRUE(parser.loadBinaryFile(out, "test_data/binary.bin"));
+  out.pop_back(); // Remove null terminator for comparison
   EXPECT_EQ(out, testData);
 }
 
@@ -50,13 +54,17 @@ TEST(ParserTest, LoadBinaryFileEmpty) {
   SSerializer::Parser parser;
   std::vector<unsigned char> out;
   EXPECT_TRUE(parser.loadBinaryFile(out, "test_data/empty.bin"));
+  out.pop_back(); // Remove null terminator for comparison
   EXPECT_TRUE(out.empty());
 }
 
 TEST(ParserTest, LoadBinaryFileNonexistent) {
   SSerializer::Parser parser;
   std::vector<unsigned char> out;
+  testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.loadBinaryFile(out, "test_data/nonexistent.bin"));
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent.bin"), std::string::npos);
 }
 
 

@@ -56,7 +56,7 @@ bool Parser::loadBinaryFile(std::vector<unsigned char>& dataOut, const std::stri
 		return Logger::error("Parser", "loadBinaryFile", "Failed to get file size");
 	}
 
-	dataOut.resize(fileSize);
+	dataOut.resize(fileSize + 1);
 	size_t bytesRead = fread(dataOut.data(), 1, fileSize, file);
 	fclose(file);
 
@@ -65,6 +65,7 @@ bool Parser::loadBinaryFile(std::vector<unsigned char>& dataOut, const std::stri
 		return Logger::error("Parser", "loadBinaryFile", "fread failed. Expected " + std::to_string(fileSize) + ", got " + std::to_string(bytesRead));
 	}
 
+	dataOut[fileSize] = '\0';
 	return true;
 }
 
@@ -80,7 +81,8 @@ bool Parser::parseBool(const unsigned char*& p, bool& out) {
 	unsigned char tok[6]{};
 	if (!parseToken(p, tok, sizeof(tok))) return false;
 
-	for (unsigned char& c : tok) c = static_cast<unsigned char>(std::tolower(c));
+	for (unsigned char& c : tok) 
+		c = static_cast<unsigned char>(std::tolower(static_cast<int>(c)));
 
 	const char* str = reinterpret_cast<const char*>(tok);
 	if (strcmp(str, "true") == 0 || strcmp(str, "on") == 0) { out = true; return true; }
@@ -254,7 +256,7 @@ bool Parser::getFileSize(FILE* file, size_t& sizeOut) const {
 }
 
 bool Parser::isDelim(unsigned char c, bool comma) {
-	return c == 0 || c == ' ' || c == '\t' || c == '\n' || c == '\r' || (comma && c == ',');
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || (comma && c == ',');
 }
 
 }

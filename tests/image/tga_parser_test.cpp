@@ -178,7 +178,11 @@ TEST_F(TgaParserTest, OneByOneImage) {
 TEST_F(TgaParserTest, FileTooSmall) {
   std::string tga(10, '\0');
   createTestFile("test_data/too_small.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/too_small.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("File too small: 11 bytes"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, UnsupportedImageType) {
@@ -188,11 +192,13 @@ TEST_F(TgaParserTest, UnsupportedImageType) {
     .setPixel(0, 1, 255, 0, 0)
     .setPixel(1, 1, 255, 255, 255)
     .build();
-
   tga[2] = 1; // RLE compressed
-
   createTestFile("test_data/bad_type.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_type.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Unsupported TGA image type"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, WithColorMap) {
@@ -202,11 +208,13 @@ TEST_F(TgaParserTest, WithColorMap) {
     .setPixel(0, 1, 255, 0, 0)
     .setPixel(1, 1, 255, 255, 255)
     .build();
-
   tga[1] = 1; // Has colour map
-
   createTestFile("test_data/with_colourmap.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/with_colourmap.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Unsupported TGA colour map type"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, UnsupportedBitsPerPixel) {
@@ -216,11 +224,13 @@ TEST_F(TgaParserTest, UnsupportedBitsPerPixel) {
     .setPixel(0, 1, 255, 0, 0)
     .setPixel(1, 1, 255, 255, 255)
     .build();
-
   tga[16] = 16;
-
   createTestFile("test_data/bad_bpp.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_bpp.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Unsupported TGA bits per pixel"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, InvalidDataOffset) {
@@ -230,37 +240,51 @@ TEST_F(TgaParserTest, InvalidDataOffset) {
     .setPixel(0, 1, 255, 0, 0)
     .setPixel(1, 1, 255, 255, 255)
     .build();
-
   tga[0] = 100; // ID length beyond file size
-
   createTestFile("test_data/bad_offset.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/bad_offset.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid data offset"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, InsufficientPixelData) {
   std::string tga = TgaBuilder(2, 2).build();
-  tga.resize(18 + 3);
-
+  tga.resize(21);
   createTestFile("test_data/truncated.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/truncated.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("File too small for declared dimensions: 22 bytes, need 30 bytes"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, ZeroWidth) {
   std::string tga = TgaBuilder(2, 2).build();
   *reinterpret_cast<uint16_t*>(&tga[12]) = 0;
- 
   createTestFile("test_data/zero_width.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero_width.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid width: 0"), std::string::npos);
 }
   
 TEST_F(TgaParserTest, ZeroHeight) {
   std::string tga = TgaBuilder(2, 2).build();
   *reinterpret_cast<int16_t*>(&tga[14]) = 0;
-
   createTestFile("test_data/zero_height.tga", tga);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero_height.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Invalid height: 0"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, FileNotFound) {
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/nonexistent.tga");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent.tga"), std::string::npos);
 }
