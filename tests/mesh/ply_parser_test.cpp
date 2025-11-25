@@ -492,7 +492,12 @@ end_header
 3 0 1 2
 )";
   createTestFile("test_data/fewer_faces.ply", ply);
+
+  testing::internal::CaptureStderr();
   expectInvalidParse("test_data/fewer_faces.ply");
+  const std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Face count declared: 2 but parsed: 1"), std::string::npos);
+  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
 }
 
 TEST_F(PlyParserTest, PlyInvalidVertexIndex) {
