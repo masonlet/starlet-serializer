@@ -44,7 +44,9 @@ bool BmpParser::parseHeader(const unsigned char* p, size_t fileSize, uint32_t& w
 	if (!validateFileSignature(p, fileSize)) return false;
 
 	dataOffset = readUint32(p, 10);
-	if (dataOffset >= fileSize) return Logger::error("BmpParser", "parseHeader", "Invalid data offset: " + std::to_string(dataOffset));
+	const size_t actualDataSize = fileSize > 0 ? fileSize - 1 : 0;
+	if (dataOffset >= actualDataSize)
+		return Logger::error("BmpParser", "parseHeader", "Invalid data offset: " + std::to_string(dataOffset));
 
 	uint32_t dibSize = readUint32(p, 14);
 	if (dibSize < BMP_DIB_HEADER_SIZE_MIN) return Logger::error("BmpParser", "parseHeader", "Unsupported DIB header size: " + std::to_string(dibSize));
@@ -82,7 +84,8 @@ bool BmpParser::copyPixelData(const unsigned char* p, size_t fileSize, uint32_t 
 	const size_t rowStridePadded = (static_cast<size_t>(width) * 3 + 3) & ~static_cast<size_t>(3);
 	const size_t needed = static_cast<size_t>(dataOffset) + rowStridePadded * static_cast<size_t>(height);
 
-	if (needed > fileSize)
+	const size_t actualDataSize = fileSize > 0 ? fileSize - 1 : 0;
+	if (needed > actualDataSize)
 		return Logger::error("BmpParser", "copyPixelData", "File too small for declared dimensions: " + std::to_string(fileSize) + " bytes, need " + std::to_string(needed) + " bytes");
 
 	const unsigned char* srcPixels = p + dataOffset;

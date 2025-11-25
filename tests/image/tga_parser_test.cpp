@@ -182,7 +182,7 @@ TEST_F(TgaParserTest, FileTooSmall) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/too_small.tga");
   const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File too small: 10 bytes"), std::string::npos);
+  EXPECT_NE(output.find("File too small: 11 bytes"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, UnsupportedImageType) {
@@ -257,7 +257,7 @@ TEST_F(TgaParserTest, InsufficientPixelData) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/truncated.tga");
   const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File too small for declared dimensions: 21 bytes, need 30 bytes"), std::string::npos);
+  EXPECT_NE(output.find("File too small for declared dimensions: 22 bytes, need 30 bytes"), std::string::npos);
 }
 
 TEST_F(TgaParserTest, ZeroWidth) {

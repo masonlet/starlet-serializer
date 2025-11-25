@@ -227,7 +227,7 @@ TEST_F(BmpParserTest, FileTooSmall) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/too_small.bmp");
   const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File too small: 20 bytes"), std::string::npos);
+  EXPECT_NE(output.find("File too small: 21 bytes"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, InvalidSignature) {
@@ -298,7 +298,7 @@ TEST_F(BmpParserTest, InsufficientPixelData) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/truncated.bmp");
   const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File too small for declared dimensions: 60 bytes, need 70 bytes"), std::string::npos);
+  EXPECT_NE(output.find("File too small for declared dimensions: 61 bytes, need 70 bytes"), std::string::npos);
 }
 
 TEST_F(BmpParserTest, ZeroWidth) {

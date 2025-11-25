@@ -45,6 +45,7 @@ TEST(ParserTest, LoadBinaryFileSuccess) {
   SSerializer::Parser parser;
   std::vector<unsigned char> out;
   EXPECT_TRUE(parser.loadBinaryFile(out, "test_data/binary.bin"));
+  out.pop_back(); // Remove null terminator for comparison
   EXPECT_EQ(out, testData);
 }
 
@@ -53,6 +54,7 @@ TEST(ParserTest, LoadBinaryFileEmpty) {
   SSerializer::Parser parser;
   std::vector<unsigned char> out;
   EXPECT_TRUE(parser.loadBinaryFile(out, "test_data/empty.bin"));
+  out.pop_back(); // Remove null terminator for comparison
   EXPECT_TRUE(out.empty());
 }
 

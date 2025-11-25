@@ -20,7 +20,8 @@ bool PlyParser::parse(const std::string& path, MeshData& out) {
 	std::vector<unsigned char> file;
 	if (!loadBinaryFile(file, path)) return false;
 
-	if (file.empty()) return Logger::error("PlyParser", "parse", "File is empty");
+	if (file.empty() || file[0] == '\0')
+		return Logger::error("PlyParser", "parse", "File is empty");
 
 	const unsigned char* p = file.data();
 	std::string errorMsg;
@@ -234,7 +235,9 @@ bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 		return Logger::error("PlyParser", "parseIndices", "Index buffer not allocated");
 
 	unsigned int i = 0;
-	while (i < out.numTriangles && *p) {
+	while (i < out.numTriangles) {
+		if (!p || *p == '\0') break;
+
 		const unsigned char* nextLine = skipToNextLine(p);
 		const unsigned char* lineEnd = trimEOL(p, nextLine);
 
@@ -244,8 +247,10 @@ bool PlyParser::parseIndices(const unsigned char*& p, MeshData& out) {
 		}
 
 		unsigned int count = 0;
-		if (!parseUInt(p, count))
+		if (!parseUInt(p, count)) {
+			if (*p == '\0') break;
 			return Logger::error("PlyParser", "parseIndices", "Failed to parse face vertex count at triangle " + std::to_string(i));
+		}
 
 		if (count != 3)
 			return Logger::error("PlyParser", "parseIndices", "Non-triangle face detected (vertex count: " + std::to_string(count) + ") at triangle " + std::to_string(i));
