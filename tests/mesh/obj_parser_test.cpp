@@ -61,6 +61,33 @@ TEST_F(ObjParserTest, NegativeIndex) {
   expectValidParse("test_data/negative.obj", 3, 1);
 }
 
+TEST_F(ObjParserTest, TextureCoordinate) {
+  createTestFile("test_data/texcoord.obj", "vt 0.5 0.5\n");
+  EXPECT_TRUE(parser.parse("test_data/texcoord.obj", out));
+  //TODO: Verify correct
+}
+
+TEST_F(ObjParserTest, TextureCoordinateWithW) {
+  createTestFile("test_data/texcoord_w.obj", "vt 0.5 0.5 1.0\n");
+  EXPECT_TRUE(parser.parse("test_data/texcoord_w.obj", out));
+  //TODO: Verify correct
+}
+
+TEST_F(ObjParserTest, Normal) {
+  createTestFile("test_data/normal.obj", "vn 0.0 1.0 0.0\n");
+  EXPECT_TRUE(parser.parse("test_data/normal.obj", out));
+  //TODO: Verify correct
+}
+
+TEST_F(ObjParserTest, MixedVertexData) {
+  createTestFile("test_data/mixed.obj", "v 0 0 0\nvt 0.0 0.0\nvn 0 1 0\nv 1 0 0\n");
+  EXPECT_TRUE(parser.parse("test_data/mixed.obj", out));
+  EXPECT_EQ(out.numVertices, 2);
+  //TODO: Verify correct
+}
+
+
+
 // Error tests
 TEST_F(ObjParserTest, EmptyFile) {
   createTestFile("test_data/empty.obj", "");
@@ -109,4 +136,36 @@ TEST_F(ObjParserTest, FaceTooFewVertices) {
   EXPECT_FALSE(parser.parse("test_data/few_verts.obj", out));
   std::string output = testing::internal::GetCapturedStderr();
   EXPECT_NE(output.find("Face has fewer than 3 vertices"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, TextureCoordMissingV) {
+  createTestFile("test_data/tc_missing.obj", "vt 0.5\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/tc_missing.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to parse texture coordinate at texCoord 0"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, TextureCoordInvalid) {
+  createTestFile("test_data/tc_invalid.obj", "vt abc 0.5\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/tc_invalid.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to parse texture coordinate"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, NormalMissingZ) {
+  createTestFile("test_data/norm_missing.obj", "vn 0.0 1.0\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/norm_missing.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to parse normal at normal 0"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, NormalInvalid) {
+  createTestFile("test_data/norm_invalid.obj", "vn 0.0 abc 1.0\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/norm_invalid.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Failed to parse normal"), std::string::npos);
 }

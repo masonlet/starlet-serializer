@@ -18,33 +18,54 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 		return Logger::error("ObjParser", "parse", "File is empty");
 
 	std::vector<Starlet::Math::Vec3<float>> positions;
+	std::vector<Starlet::Math::Vec2<float>> texCoords;
+	std::vector<Starlet::Math::Vec3<float>> normals; 
 	std::vector<unsigned int> indices;
 
-  const unsigned char* p = file.data();
-  while (*p) {
-    p = skipWhitespace(p);
-    if (*p == '\0') break;
+	const unsigned char* p = file.data();
+	while (*p) {
+		p = skipWhitespace(p);
+		if (*p == '\0') break;
 
-    if (*p == '#') {
-      p = skipToNextLine(p);
-      continue;
-    }
+		if (*p == '#') {
+			p = skipToNextLine(p);
+			continue;
+		}
 
-    unsigned char cmd[32]{};
-    if (!parseToken(p, cmd, sizeof(cmd))) {
-      p = skipToNextLine(p);
-      continue;
-    }
+		unsigned char cmd[32]{};
+		if (!parseToken(p, cmd, sizeof(cmd))) {
+			p = skipToNextLine(p);
+			continue;
+		}
 
-		if (strcmp((const char*)cmd, "v") == 0) {
+		if (strcmp(reinterpret_cast<const char*>(cmd), "v") == 0) {
 			Starlet::Math::Vec3<float> pos;
 			if (!parseFloat(p, pos.x) || !parseFloat(p, pos.y) || !parseFloat(p, pos.z))
 				return Logger::error("ObjParser", "parse", "Failed to parse vertex position at vertex " + std::to_string(positions.size()));
 
 			float w;
-			parseFloat(p, w); 
+			parseFloat(p, w);
 
 			positions.push_back(pos);
+		}
+		else if (strcmp(reinterpret_cast<const char*>(cmd), "vt") == 0) {
+			Starlet::Math::Vec2<float> texCoord;
+			if (!parseVec2f(p, texCoord))
+				return Logger::error("ObjParser", "parse", "Failed to parse texture coordinate at texCoord " + std::to_string(texCoords.size()));
+
+			float w;
+			parseFloat(p, w);
+
+			texCoords.push_back(texCoord);
+
+		}
+		else if (strcmp(reinterpret_cast<const char*>(cmd), "vn") == 0){
+			Starlet::Math::Vec3<float> normal;
+
+			if (!parseVec3f(p, normal))
+				return Logger::error("ObjParser", "parse", "Failed to parse normal at normal " + std::to_string(normals.size()));
+
+			normals.push_back(normal);
 		}
 		else if (strcmp((const char*)cmd, "f") == 0) {
 			std::vector<unsigned int> faceIndices;
