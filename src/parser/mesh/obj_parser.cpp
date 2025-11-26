@@ -2,11 +2,15 @@
 #include "starlet-serializer/data/mesh_data.hpp"
 #include "starlet-logger/logger.hpp"
 
+#include "starlet-math/vertex.hpp"
 #include "starlet-math/vec3.hpp"
+#include "starlet-math/vec2.hpp"
 
 #include <cstring>  
 #include <cfloat>
 #include <vector>
+#include <map>
+#include <tuple>
 
 namespace Starlet::Serializer {
 
@@ -20,6 +24,12 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 	std::vector<Starlet::Math::Vec3<float>> positions;
 	std::vector<Starlet::Math::Vec2<float>> texCoords;
 	std::vector<Starlet::Math::Vec3<float>> normals; 
+
+	bool usedTexCoords = false;
+	bool usedNormals = false;
+
+	std::map<std::tuple<int, int, int>, unsigned int> vertexMap;
+	std::vector<Math::Vertex> vertices;
 	std::vector<unsigned int> indices;
 
 	const unsigned char* p = file.data();
@@ -39,68 +49,147 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 		}
 
 		if (strcmp(reinterpret_cast<const char*>(cmd), "v") == 0) {
-			Starlet::Math::Vec3<float> pos;
-			if (!parseFloat(p, pos.x) || !parseFloat(p, pos.y) || !parseFloat(p, pos.z))
+			if (!parsePosition(p, positions))
 				return Logger::error("ObjParser", "parse", "Failed to parse vertex position at vertex " + std::to_string(positions.size()));
-
-			float w;
-			parseFloat(p, w);
-
-			positions.push_back(pos);
 		}
 		else if (strcmp(reinterpret_cast<const char*>(cmd), "vt") == 0) {
-			Starlet::Math::Vec2<float> texCoord;
-			if (!parseVec2f(p, texCoord))
+			if (!parseTexCoord(p, texCoords))
 				return Logger::error("ObjParser", "parse", "Failed to parse texture coordinate at texCoord " + std::to_string(texCoords.size()));
-
-			float w;
-			parseFloat(p, w);
-
-			texCoords.push_back(texCoord);
-
 		}
-		else if (strcmp(reinterpret_cast<const char*>(cmd), "vn") == 0){
-			Starlet::Math::Vec3<float> normal;
-
-			if (!parseVec3f(p, normal))
+		else if (strcmp(reinterpret_cast<const char*>(cmd), "vn") == 0) {
+			if (!parseNormal(p, normals))
 				return Logger::error("ObjParser", "parse", "Failed to parse normal at normal " + std::to_string(normals.size()));
-
-			normals.push_back(normal);
 		}
 		else if (strcmp((const char*)cmd, "f") == 0) {
-			std::vector<unsigned int> faceIndices;
+			std::vector<ObjVertex> faceVertices;
 
 			while (true) {
 				p = skipWhitespace(p);
 				if (!*p || *p == '\n' || *p == '\r') break;
 
-				int i = 0;
+				ObjVertex fv{ -1, -1, -1 };
+
+				int posI = 0;
 				bool negative = (*p == '-');
 				if (negative) ++p;
 
 				unsigned int absVal;
 				if (!parseUInt(p, absVal)) break;
+				posI = negative ? -static_cast<int>(absVal) : static_cast<int>(absVal);
 
-				i = negative ? -static_cast<int>(absVal) : static_cast<int>(absVal);
-
-				if (i > 0) --i;
-				else if (i < 0 ) i = static_cast<int>(positions.size()) + i;
+				if (posI > 0) --posI;
+				else if (posI < 0) posI = static_cast<int>(positions.size()) + posI;
 				else return Logger::error("ObjParser", "parse", "Face index cannot be 0");
 
-				if(i < 0 || i >= static_cast<int>(positions.size()))
-					return Logger::error("ObjParser", "parse", "Face index out of bounds" + std::to_string(i));
+				if (posI < 0 || posI >= static_cast<int>(positions.size()))
+					return Logger::error("ObjParser", "parse", "Face index out of bounds" + std::to_string(posI));
 
-				faceIndices.push_back(i);
+				fv.posI = posI;
 
 				while (*p == '/') {
 					++p;
-					unsigned int dummy;
-					parseUInt(p, dummy);
+
+					if (*p == '/') {
+						++p;
+
+						if (*p != ' ' && *p != '\n' && *p != '\r') {
+							int normI{ 0 };
+							negative = (*p == '-');
+							if (negative) ++p;
+
+							if (parseUInt(p, absVal)) {
+								normI = negative ? -static_cast<int>(absVal) : static_cast<int>(absVal);
+
+								if (normI > 0) normI--;
+								else if (normI < 0) normI = static_cast<int>(normals.size()) + normI;
+								else return Logger::error("ObjParser", "parse", "Normal index cannot be 0");
+
+								if (normI < 0 || normI >= static_cast<int>(normals.size()))
+									return Logger::error("ObjParser", "parse", "Normal index out of bounds: " + std::to_string(normI));
+
+								fv.normI = normI;
+							}
+						}
+						break;
+					}
+
+					if (*p == ' ' || *p == '\n' || *p == '\r')
+						return Logger::error("ObjParser", "parse", "Expected texture coordinate index after '/'");
+
+					int texCoordI{ 0 };
+					negative = (*p == '-');
+					if (negative) ++p;
+
+					if (!parseUInt(p, absVal))
+						return Logger::error("ObjParser", "parse", "Expected texture coordinate index after '/'");
+
+					texCoordI = negative ? -static_cast<int>(absVal) : static_cast<int>(absVal);
+
+					if (texCoordI > 0) texCoordI--;
+					else if (texCoordI < 0) texCoordI = static_cast<int>(texCoords.size()) + texCoordI;
+					else return Logger::error("ObjParser", "parse", "TexCoord index cannot be 0");
+
+					if (texCoordI < 0 || texCoordI >= static_cast<int>(texCoords.size()))
+						return Logger::error("ObjParser", "parse", "TexCoord index out of bounds: " + std::to_string(texCoordI));
+
+					fv.texI = texCoordI;
+
+					if (*p == '/') {
+						++p;
+
+						if (*p != ' ' && *p != '\n' && *p != '\r') {
+							int normI{ 0 };
+							negative = (*p == '-');
+							if (negative) ++p;
+
+							if (parseUInt(p, absVal)) {
+								normI = negative ? -static_cast<int>(absVal) : static_cast<int>(absVal);
+
+								if (normI > 0) normI--;
+								else if (normI < 0) normI = static_cast<int>(normals.size()) + normI;
+								else return Logger::error("ObjParser", "parse", "Normal index cannot be 0");
+
+								if (normI < 0 || normI >= static_cast<int>(normals.size()))
+									return Logger::error("ObjParser", "parse", "Normal index out of bounds: " + std::to_string(normI));
+
+								fv.normI = normI;
+							}
+						}
+					}
+					break;
 				}
+
+				faceVertices.push_back(fv);
 			}
 
-			if (faceIndices.size() < 3)
+			if (faceVertices.size() < 3)
 				return Logger::error("ObjParser", "parse", "Face has fewer than 3 vertices");
+
+			std::vector<unsigned int> faceIndices;
+			for (const ObjVertex& fv : faceVertices) {
+				std::tuple<int, int, int> key = std::make_tuple(fv.posI, fv.texI, fv.normI);
+
+				auto it = vertexMap.find(key);
+				if (it != vertexMap.end())
+					faceIndices.push_back(it->second);
+				else {
+					Math::Vertex v{};
+					v.pos = positions[fv.posI];
+					if (fv.texI >= 0) {
+						v.texCoord = texCoords[fv.texI];
+						usedTexCoords = true;
+					}
+					if (fv.normI >= 0) {
+						v.norm = normals[fv.normI];
+						usedNormals = true;
+					}
+
+					unsigned int i = static_cast<unsigned int>(vertices.size());
+					vertices.push_back(v);
+					vertexMap[key] = i;
+					faceIndices.push_back(i);
+				}
+			}
 
 			for (size_t i = 2; i < faceIndices.size(); ++i) {
 				indices.push_back(faceIndices[0]);
@@ -108,22 +197,70 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 				indices.push_back(faceIndices[i]);
 			}
 		}
-		else {
-			p = skipToNextLine(p);
-		}
+		else p = skipToNextLine(p);
   }
 
-	out.numVertices = positions.size();
-	out.vertices.resize(out.numVertices);
-	for (size_t i = 0; i < out.numVertices; ++i) {
-		out.vertices[i].pos = positions[i];
+	if (vertices.empty() && !positions.empty()) {
+		for (const Starlet::Math::Vec3<float>& pos : positions) {
+			Math::Vertex v{};
+			v.pos = pos;
+			vertices.push_back(v);
+		}
 	}
+
+	fillMeshData(out, vertices, indices, usedTexCoords, usedNormals);
+	return true;
+}
+
+bool ObjParser::parsePosition(const unsigned char*& p, std::vector<Starlet::Math::Vec3<float>>& positions) {
+	Starlet::Math::Vec3<float> pos;
+	if (!parseVec3f(p, pos))
+		return false;
+
+	float w;
+	parseFloat(p, w); 
+
+	positions.push_back(pos);
+	return true;
+}
+
+bool ObjParser::parseTexCoord(const unsigned char*& p, std::vector<Starlet::Math::Vec2<float>>& texCoords) {
+	Starlet::Math::Vec2<float> tex;
+	if (!parseVec2f(p, tex))
+		return false;
+
+	float w;
+	parseFloat(p, w);
+
+	texCoords.push_back(tex);
+	return true;
+}
+
+bool ObjParser::parseNormal(const unsigned char*& p, std::vector<Starlet::Math::Vec3<float>>& normals) {
+	Starlet::Math::Vec3<float> norm;
+	if (!parseVec3f(p, norm))
+		return false;
+
+	normals.push_back(norm);
+	return true;
+}
+
+void ObjParser::fillMeshData(
+	MeshData& out,
+	std::vector<Starlet::Math::Vertex>& vertices,
+	std::vector<unsigned int>& indices,
+	bool usedTexCoords,
+	bool usedNormals
+) {
+	out.vertices = std::move(vertices);
+	out.numVertices = out.vertices.size();
 
 	out.numIndices = indices.size();
 	out.numTriangles = out.numIndices / 3;
 	out.indices = std::move(indices);
 
-	return true;
+	out.hasTexCoords = usedTexCoords;
+	out.hasNormals = usedNormals;
 }
 
 }
