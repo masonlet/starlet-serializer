@@ -37,6 +37,29 @@ TEST_F(ObjParserTest, VerticesWithComments) {
   EXPECT_EQ(out.numVertices, 2);
 }
 
+TEST_F(ObjParserTest, SingleTriangle) {
+  createTestFile("test_data/triangle.obj", "v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
+  expectValidParse("test_data/triangle.obj", 3, 1);
+  EXPECT_EQ(out.indices[0], 0);
+  EXPECT_EQ(out.indices[1], 1);
+  EXPECT_EQ(out.indices[2], 2);
+}
+
+TEST_F(ObjParserTest, QuadTriangulation) {
+  createTestFile("test_data/quad.obj", "v 0 0 0\nv 1 0 0\nv 1 1 0\nv 0 1 0\nf 1 2 3 4\n");
+  expectValidParse("test_data/quad.obj", 4, 2);
+  EXPECT_EQ(out.indices[0], 0);
+  EXPECT_EQ(out.indices[1], 1);
+  EXPECT_EQ(out.indices[2], 2);
+  EXPECT_EQ(out.indices[3], 0);
+  EXPECT_EQ(out.indices[4], 2);
+  EXPECT_EQ(out.indices[5], 3);
+}
+
+TEST_F(ObjParserTest, NegativeIndex) {
+  createTestFile("test_data/negative.obj", "v 0 0 0\nv 1 0 0\nv 0 1 0\nf -3 -2 -1\n");
+  expectValidParse("test_data/negative.obj", 3, 1);
+}
 
 // Error tests
 TEST_F(ObjParserTest, EmptyFile) {
@@ -62,4 +85,28 @@ TEST_F(ObjParserTest, VertexInvalidFloat) {
   EXPECT_FALSE(parser.parse("test_data/invalid_float.obj", out));
   std::string output = testing::internal::GetCapturedStderr();
   EXPECT_NE(output.find("Failed to parse vertex position"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, FaceIndexZero) {
+  createTestFile("test_data/zero_index.obj", "v 0 0 0\nf 0 1 2\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/zero_index.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Face index cannot be 0"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, FaceIndexOutOfBounds) {
+  createTestFile("test_data/bounds.obj", "v 0 0 0\nf 1 2 3\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/bounds.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Face index out of bounds"), std::string::npos);
+}
+
+TEST_F(ObjParserTest, FaceTooFewVertices) {
+  createTestFile("test_data/few_verts.obj", "v 0 0 0\nv 1 0 0\nf 1 2\n");
+  testing::internal::CaptureStderr();
+  EXPECT_FALSE(parser.parse("test_data/few_verts.obj", out));
+  std::string output = testing::internal::GetCapturedStderr();
+  EXPECT_NE(output.find("Face has fewer than 3 vertices"), std::string::npos);
 }
