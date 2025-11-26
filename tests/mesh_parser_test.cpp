@@ -37,36 +37,18 @@ TEST_F(MeshParserTest, DetectFormatPlyMixedCase) {
 
 // OBJ format detection
 TEST_F(MeshParserTest, DetectFormatObjLowercase) {
-  createTestFile("test_data/model.obj", "obj");
-
-  testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  // OBJ extension was properly detected and routed to ObjParser
-  EXPECT_NE(output.find("ObjParser"), std::string::npos);
+  createTestFile("test_data/model.obj", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.obj", out));
 }
 
 TEST_F(MeshParserTest, DetectFormatObjUppercase) {
-  createTestFile("test_data/model.OBJ", "obj");
-
-  testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.OBJ", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  // OBJ extension was properly detected and routed to ObjParser
-  EXPECT_NE(output.find("ObjParser"), std::string::npos);
+  createTestFile("test_data/model.OBJ", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.OBJ", out));
 }
 
 TEST_F(MeshParserTest, DetectFormatObjMixedCase) {
-  createTestFile("test_data/model.ObJ", "obj");
-
-  testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.ObJ", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  // OBJ extension was properly detected and routed to ObjParser
-  EXPECT_NE(output.find("ObjParser"), std::string::npos);
+  createTestFile("test_data/model.ObJ", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.ObJ", out));
 }
 
 

@@ -358,7 +358,7 @@ end_header
 
 
 // Error tests
-TEST_F(PlyParserTest, PlyEmpty) {
+TEST_F(PlyParserTest, EmptyFile) {
   createTestFile("test_data/empty.ply", "");
 
   testing::internal::CaptureStderr();
