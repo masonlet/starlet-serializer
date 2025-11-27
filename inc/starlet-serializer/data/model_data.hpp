@@ -10,7 +10,7 @@ enum class ColourMode {
 	Solid,
 	Random,
 	VerticalGradient,
-	PLYColour
+	VertexColour
 };
 
 struct ModelData : public ColouredTransformedData {

@@ -214,7 +214,7 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 		}
 	}
 
-	fillMeshData(out, vertices, indices, usedTexCoords, usedNormals);
+	fillMeshData(out, vertices, indices, usedTexCoords, usedNormals, !colours.empty());
 	return true;
 }
 
@@ -287,8 +287,7 @@ void ObjParser::fillMeshData(
 	MeshData& out,
 	std::vector<Starlet::Math::Vertex>& vertices,
 	std::vector<unsigned int>& indices,
-	bool usedTexCoords,
-	bool usedNormals
+	bool usedTexCoords, bool usedNormals, bool usedColours
 ) {
 	out.vertices = std::move(vertices);
 	out.numVertices = out.vertices.size();
@@ -299,6 +298,7 @@ void ObjParser::fillMeshData(
 
 	out.hasTexCoords = usedTexCoords;
 	out.hasNormals = usedNormals;
+	out.hasColours = usedColours;
 }
 
 }

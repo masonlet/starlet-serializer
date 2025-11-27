@@ -35,8 +35,7 @@ namespace Serializer {
 			MeshData& out,
 			std::vector<Starlet::Math::Vertex>& vertices,
 			std::vector<unsigned int>& indices,
-			bool usedTexCoords,
-			bool usedNormals
+			bool usedTexCoords, bool usedNormals, bool usedColours
 		);
 	};
 }
