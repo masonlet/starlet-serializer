@@ -31,7 +31,7 @@ bool SceneParser::parseSpecialColour(const unsigned char*& p, ColourMode& mode) 
   const char* name = reinterpret_cast<const char*>(input);
   if (strcmp(name, "Random") == 0)       mode = ColourMode::Random;
   else if (strcmp(name, "Rainbow") == 0) mode = ColourMode::VerticalGradient;
-  else if (strcmp(name, "PLY") == 0)     mode = ColourMode::PLYColour;
+  else if (strcmp(name, "VertexColour") == 0) mode = ColourMode::VertexColour;
   else return false;
 
   return true;

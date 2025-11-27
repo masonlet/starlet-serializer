@@ -208,7 +208,7 @@ bool Writer::writeColourMode(std::ostream& file, const ModelData& model) {
   }
   case ColourMode::Random:           file << "Random"; break;
   case ColourMode::VerticalGradient: file << "Rainbow"; break;
-  case ColourMode::PLYColour:        file << "PLY"; break;
+  case ColourMode::VertexColour:     file << "VertexColour"; break;
   default: break;
   }
 
