@@ -22,6 +22,8 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 		return Logger::error("ObjParser", "parse", "File is empty");
 
 	std::vector<Starlet::Math::Vec3<float>> positions;
+	std::vector<Starlet::Math::Vec4<float>> colours;
+
 	std::vector<Starlet::Math::Vec2<float>> texCoords;
 	std::vector<Starlet::Math::Vec3<float>> normals; 
 
@@ -49,7 +51,7 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 		}
 
 		if (strcmp(reinterpret_cast<const char*>(cmd), "v") == 0) {
-			if (!parsePosition(p, positions))
+			if (!parsePosition(p, positions, colours))
 				return Logger::error("ObjParser", "parse", "Failed to parse vertex position at vertex " + std::to_string(positions.size()));
 		}
 		else if (strcmp(reinterpret_cast<const char*>(cmd), "vt") == 0) {
@@ -175,6 +177,7 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 				else {
 					Math::Vertex v{};
 					v.pos = positions[fv.posI];
+					v.col = colours[fv.posI];
 					if (fv.texI >= 0) {
 						v.texCoord = texCoords[fv.texI];
 						usedTexCoords = true;
@@ -201,9 +204,12 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
   }
 
 	if (vertices.empty() && !positions.empty()) {
-		for (const Starlet::Math::Vec3<float>& pos : positions) {
+		for (size_t i = 0; i < positions.size(); ++i) {
 			Math::Vertex v{};
-			v.pos = pos;
+
+			v.pos = positions[i];
+			v.col = colours[i];
+
 			vertices.push_back(v);
 		}
 	}
@@ -212,14 +218,46 @@ bool ObjParser::parse(const std::string& path, MeshData& out) {
 	return true;
 }
 
-bool ObjParser::parsePosition(const unsigned char*& p, std::vector<Starlet::Math::Vec3<float>>& positions) {
+bool ObjParser::parsePosition(const unsigned char*& p, 
+	std::vector<Starlet::Math::Vec3<float>>& positions,
+	std::vector<Starlet::Math::Vec4<float>>& colours) {
+
 	Starlet::Math::Vec3<float> pos;
 	if (!parseVec3f(p, pos))
 		return false;
 
-	float w;
-	parseFloat(p, w); 
+	Starlet::Math::Vec4<float> col{ 1.0f, 1.0f, 1.0f, 1.0f };
+	float w{ 1.0f };
 
+	const unsigned char* start = p;
+	std::vector<float> extra;
+	while (true) {
+		float val;
+		const unsigned char* save = p;
+		if (parseFloat(p, val))
+			extra.push_back(val);
+		else {
+			p = save;
+			break;
+		}
+	}
+
+	if (extra.size() == 1) {
+		w = extra[0];
+	}
+	else if (extra.size() == 3) {
+		col.x = extra[0];
+		col.y = extra[1];
+		col.z = extra[2];
+	}
+	else if (extra.size() == 4) {
+		col.x = extra[0];
+		col.y = extra[1];
+		col.z = extra[2];
+		col.w = extra[3];
+	}
+
+	colours.push_back(col);
 	positions.push_back(pos);
 	return true;
 }

@@ -25,7 +25,9 @@ namespace Serializer {
 			int normI;
 		};
 
-		bool parsePosition(const unsigned char*& p, std::vector<Starlet::Math::Vec3<float>>& positions);
+		bool parsePosition(const unsigned char*& p, 
+			std::vector<Starlet::Math::Vec3<float>>& positions,
+			std::vector<Starlet::Math::Vec4<float>>& colours);
 		bool parseTexCoord(const unsigned char*& p, std::vector<Starlet::Math::Vec2<float>>& texCoords);
 		bool parseNormal(const unsigned char*& p, std::vector<Starlet::Math::Vec3<float>>& normals);
 

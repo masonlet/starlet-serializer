@@ -40,6 +40,38 @@ TEST_F(ObjParserTest, VerticesWithComments) {
   EXPECT_EQ(out.numVertices, 2);
 }
 
+TEST_F(ObjParserTest, VertexWithColour) {
+  createTestFile("test_data/vertex_color.obj",
+    "v 1.0 2.0 3.0 0.1 0.2 0.3 0.4\n");
+  EXPECT_TRUE(parser.parse("test_data/vertex_color.obj", out));
+  EXPECT_EQ(out.numVertices, 1);
+  EXPECT_FLOAT_EQ(out.vertices[0].pos.x, 1.0f);
+  EXPECT_FLOAT_EQ(out.vertices[0].pos.y, 2.0f);
+  EXPECT_FLOAT_EQ(out.vertices[0].pos.z, 3.0f);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.x, 0.1f);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.y, 0.2f);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.z, 0.3f);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.w, 0.4f);
+}
+
+TEST_F(ObjParserTest, VertexColourOptionalAlpha) {
+  createTestFile("test_data/vertex_color_alpha.obj",
+    "v 1.0 2.0 3.0 0.5 0.5 0.5\n"); 
+  EXPECT_TRUE(parser.parse("test_data/vertex_color_alpha.obj", out));
+  EXPECT_EQ(out.numVertices, 1);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.w, 1.0f);
+}
+
+TEST_F(ObjParserTest, VertexColourAndFace) {
+  createTestFile("test_data/color_face.obj",
+    "v 0 0 0 1 0 0\nv 1 0 0 0 1 0\nv 0 1 0 0 0 1\n"
+    "f 1 2 3\n");
+  EXPECT_TRUE(parser.parse("test_data/color_face.obj", out));
+  EXPECT_EQ(out.numTriangles, 1);
+  EXPECT_FLOAT_EQ(out.vertices[0].col.x, 1.0f);
+  EXPECT_FLOAT_EQ(out.vertices[1].col.y, 1.0f);
+  EXPECT_FLOAT_EQ(out.vertices[2].col.z, 1.0f);
+}
 
 
 TEST_F(ObjParserTest, SingleTriangle) {
