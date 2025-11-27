@@ -182,11 +182,11 @@ TEST_F(SceneParserTest, ColourSpecialModes) {
   createTestFile("test_data/colours_special.txt",
     "model true true M mesh.ply 0 0 0 0 0 0 1 1 1 Random 1 1 1 1\n"
     "model true true M2 mesh.ply 0 0 0 0 0 0 1 1 1 Rainbow 1 1 1 1\n"
-    "model true true M3 mesh.ply 0 0 0 0 0 0 1 1 1 PLY 1 1 1 1\n");
+    "model true true M3 mesh.ply 0 0 0 0 0 0 1 1 1 VertexColour 1 1 1 1\n");
   expectValidParse("test_data/colours_special.txt");
   EXPECT_EQ(out.models[0].mode, ColourMode::Random);
   EXPECT_EQ(out.models[1].mode, ColourMode::VerticalGradient);
-  EXPECT_EQ(out.models[2].mode, ColourMode::PLYColour);
+  EXPECT_EQ(out.models[2].mode, ColourMode::VertexColour);
 }
 
 TEST_F(SceneParserTest, ModelZeroScale) {
