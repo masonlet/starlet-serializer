@@ -2,7 +2,7 @@
 
 // PLY format detection
 TEST_F(MeshParserTest, DetectFormatPlyLowercase) {
-  createTestFile("test_data/model.ply", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+  createTestFile("test_data/model.ply", "ply");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.ply", out));
@@ -13,7 +13,7 @@ TEST_F(MeshParserTest, DetectFormatPlyLowercase) {
 }
 
 TEST_F(MeshParserTest, DetectFormatPlyUppercase) {
-  createTestFile("test_data/model.PLY", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+  createTestFile("test_data/model.PLY", "ply");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.PLY", out));
@@ -24,7 +24,7 @@ TEST_F(MeshParserTest, DetectFormatPlyUppercase) {
 }
 
 TEST_F(MeshParserTest, DetectFormatPlyMixedCase) {
-  createTestFile("test_data/model.PlY", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+  createTestFile("test_data/model.PlY", "ply");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.PlY", out));
@@ -35,9 +35,26 @@ TEST_F(MeshParserTest, DetectFormatPlyMixedCase) {
 }
 
 
+// OBJ format detection
+TEST_F(MeshParserTest, DetectFormatObjLowercase) {
+  createTestFile("test_data/model.obj", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.obj", out));
+}
+
+TEST_F(MeshParserTest, DetectFormatObjUppercase) {
+  createTestFile("test_data/model.OBJ", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.OBJ", out));
+}
+
+TEST_F(MeshParserTest, DetectFormatObjMixedCase) {
+  createTestFile("test_data/model.ObJ", "# obj");
+  EXPECT_TRUE(parser.parse("test_data/model.ObJ", out));
+}
+
+
 // Edge cases
 TEST_F(MeshParserTest, DetectFormatNoExtension) {
-  createTestFile("test_data/model", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+  createTestFile("test_data/model", "");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model", out));
@@ -47,7 +64,7 @@ TEST_F(MeshParserTest, DetectFormatNoExtension) {
 }
 
 TEST_F(MeshParserTest, DetectFormatUnknownExtension) {
-  createTestFile("test_data/model.unknown", "ply\nformat ascii 1.0\nelement vertex 0\nelement face 0\nend_header\n");
+  createTestFile("test_data/model.unknown", "");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.unknown", out));
@@ -57,7 +74,7 @@ TEST_F(MeshParserTest, DetectFormatUnknownExtension) {
 }
 
 TEST_F(MeshParserTest, DetectFormatEmptyExtension) {
-  createTestFile("test_data/model.", "ply\n");
+  createTestFile("test_data/model.", "");
 
   testing::internal::CaptureStderr();
   EXPECT_FALSE(parser.parse("test_data/model.", out));

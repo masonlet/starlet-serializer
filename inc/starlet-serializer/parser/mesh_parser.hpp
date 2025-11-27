@@ -13,6 +13,7 @@ public:
 private:
 	enum class MeshFormat {
 		PLY,
+		OBJ,
 		UNKNOWN
 	};
 
