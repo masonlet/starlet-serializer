@@ -21,9 +21,9 @@ if(NOT TARGET ${PROJECT_NAME})
         GIT_REPOSITORY https://github.com/masonlet/starlet-logger.git 
         GIT_TAG main
       )
-    endif()
 
-    FetchContent_MakeAvailable(starlet_math starlet_logger)
+      FetchContent_MakeAvailable(starlet_math starlet_logger)
+    endif()
   endif()
 
   add_library(${PROJECT_NAME} STATIC)
