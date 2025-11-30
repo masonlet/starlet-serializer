@@ -5,25 +5,22 @@
 
 #include "starlet-logger/logger.hpp"
 
-#include <memory>
-
 namespace Starlet::Serializer {
 
 bool ImageParser::parse(const std::string& path, ImageData& out) {
-	std::unique_ptr<ImageParserBase> parser;
 	switch (detectFormat(path)) {
-			case ImageFormat::BMP:
-				parser = std::make_unique<BmpParser>();
-				break;
-			case ImageFormat::TGA:
-				parser = std::make_unique<TgaParser>();
-				break;
-			default:
-				Logger::error("ImageParser", "parse", "Unsupported image format: " + path);
-				return false;
+	case ImageFormat::BMP: {
+		BmpParser parser;
+		return parser.parse(path, out);
 	}
-
-	return parser->parse(path, out);
+	case ImageFormat::TGA: {
+		TgaParser parser;
+		return parser.parse(path, out);
+	}
+	default:
+		Logger::error("ImageParser", "parse", "Unsupported image format: " + path);
+		return false;
+	}
 }
 
 ImageParser::ImageFormat ImageParser::detectFormat(const std::string& path) {
