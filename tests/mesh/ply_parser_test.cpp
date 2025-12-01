@@ -360,11 +360,9 @@ end_header
 // Error tests
 TEST_F(PlyParserTest, EmptyFile) {
   createTestFile("test_data/empty.ply", "");
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/empty.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File is empty"), std::string::npos);
+  expectStderrContains({ "File is empty" });
 }
 
 TEST_F(PlyParserTest, PlyNoHeader) {
@@ -372,8 +370,7 @@ TEST_F(PlyParserTest, PlyNoHeader) {
 
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/noheader.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse header, 'end_header' not found"), std::string::npos);
+  expectStderrContains({ "Failed to parse header, 'end_header' not found" });
 }
 
 TEST_F(PlyParserTest, PlyZeroVertices) {
@@ -384,11 +381,9 @@ element face 0
 end_header
 )";
   createTestFile("test_data/zero.ply", plyContent);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse header, no vertices/triangles declared"), std::string::npos);
+  expectStderrContains({ "Failed to parse header, no vertices/triangles declared" });
 }
 
 TEST_F(PlyParserTest, PlyZeroFaces) {
@@ -405,11 +400,9 @@ end_header
 0 1 0
 )";
   createTestFile("test_data/nofaces.ply", plyContent);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/nofaces.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse header, no vertices/triangles declared"), std::string::npos);
+  expectStderrContains({ "Failed to parse header, no vertices/triangles declared" });
 }
 
 TEST_F(PlyParserTest, PlyInvalidFloat) {
@@ -424,11 +417,9 @@ end_header
 a b c
 )";
   createTestFile("test_data/invalid_float.ply", plyContent);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/invalid_float.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse header, no vertices/triangles declared"), std::string::npos);
+  expectStderrContains({ "Failed to parse header, no vertices/triangles declared" });
 }
 
 TEST_F(PlyParserTest, PlyMissingEndHeader) {
@@ -441,18 +432,15 @@ property float z
 0.0 0.0 0.0
 )";
   createTestFile("test_data/noend.ply", plyContent);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/noend.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse header, 'end_header' not found"), std::string::npos);
+  expectStderrContains({ "Failed to parse header, 'end_header' not found" });
 }
 
 TEST_F(PlyParserTest, PlyNonexistentFile) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/nonexistent.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent.ply"), std::string::npos);
+  expectStderrContains({ "Failed to open file: test_data/nonexistent.ply" });
 }
 
 TEST_F(PlyParserTest, PlyFewerVerticesThanDeclared) {
@@ -472,8 +460,7 @@ end_header
 
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/fewer_verts.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse vertex data"), std::string::npos);
+  expectStderrContains({ "Failed to parse vertex data" });
 }
 
 TEST_F(PlyParserTest, PlyFewerFacesThanDeclared) {
@@ -495,9 +482,10 @@ end_header
 
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/fewer_faces.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Face count declared: 2 but parsed: 1"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
+  expectStderrContains({
+    "Face count declared: 2 but parsed: 1",
+    "Failed to parse face data"
+  });
 }
 
 TEST_F(PlyParserTest, PlyInvalidVertexIndex) {
@@ -515,12 +503,12 @@ end_header
 3 0 1 5
 )";
   createTestFile("test_data/invalid_index.ply", ply);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/invalid_index.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Index out of bounds at triangle 0"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
+  expectStderrContains({
+    "Index out of bounds at triangle 0",
+    "Failed to parse face data"
+  });
 }
 
 TEST_F(PlyParserTest, RejectNonTriangleFace) {
@@ -540,12 +528,12 @@ end_header
 4 0 1 2 3
 )";
   createTestFile("test_data/quad_face.ply", ply);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/quad_face.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Non-triangle face detected (vertex count: 4) at triangle 0"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
+  expectStderrContains({
+    "Non-triangle face detected (vertex count: 4) at triangle 0",
+    "Failed to parse face data"
+  });
 }
 
 TEST_F(PlyParserTest, RejectFaceWithZeroIndices) {
@@ -562,12 +550,12 @@ end_header
 0
 )";
   createTestFile("test_data/zero_face.ply", ply);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/zero_face.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Non-triangle face detected (vertex count: 0) at triangle 0"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
+  expectStderrContains({
+    "Non-triangle face detected (vertex count: 0) at triangle 0",
+    "Failed to parse face data"
+  });
 }
 
 TEST_F(PlyParserTest, RejectFaceWithOneIndex) {
@@ -584,12 +572,12 @@ end_header
 1 0
 )";
   createTestFile("test_data/one_face.ply", ply);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/one_face.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Non-triangle face detected (vertex count: 1) at triangle 0"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse face data"), std::string::npos);
+  expectStderrContains({
+    "Non-triangle face detected (vertex count: 1) at triangle 0",
+    "Failed to parse face data" 
+  });
 }
 
 TEST_F(PlyParserTest, RejectIncompleteVertexData) {
@@ -606,10 +594,10 @@ end_header
 1 0
 )";
   createTestFile("test_data/incomplete_vertex.ply", ply);
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/incomplete_vertex.ply");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse position Z at vertex 1"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse vertex data"), std::string::npos);
+  expectStderrContains({
+    "Failed to parse position Z at vertex 1",
+    "Failed to parse vertex data"
+  });
 }

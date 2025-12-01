@@ -20,7 +20,6 @@ protected:
 
   SSerializer::SceneParser parser;
   SSerializer::SceneData out;
-  const std::string tp = "test_data";
 };
 
 
@@ -81,7 +80,6 @@ TEST_F(SceneParserTest, LightTypeVariations) {
     "light true D Directional 0 0 0 0 -1 0 Red 1 0 0 1 0 0\n"
     "light true P 0 0 0 0 0 -1 0 Red 1 0 0 1 0 0\n"
     "light true SpotNum 1 0 0 0 0 -1 0 Red 1 0 0 1 0 0\n");
-
   expectValidParse("test_data/light_types.txt");
   EXPECT_EQ(out.lights[0].type, LightType::Spot);
   EXPECT_EQ(out.lights[1].type, LightType::Directional);
@@ -97,7 +95,6 @@ TEST_F(SceneParserTest, LightTypePointNumericZero) {
 
 TEST_F(SceneParserTest, EmptyFile) {
   createTestFile("test_data/empty.txt", "");
-
   expectValidParse("test_data/empty.txt");
   EXPECT_EQ(out.models.size(), 0);
   EXPECT_EQ(out.lights.size(), 0);
@@ -108,7 +105,6 @@ TEST_F(SceneParserTest, OnlyCommentsFile) {
     "# Comment line 1\n"
     "comment Comment line 2\n"
     "# Comment line 3\n");
-
   expectValidParse("test_data/comments.txt");
   EXPECT_EQ(out.cameras.size(), 0);
 }
@@ -326,63 +322,67 @@ TEST_F(SceneParserTest, UnknownTokenFails) {
   createTestFile("test_data/unknown_token.txt", "unknownEntity someData\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/unknown_token.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to handle: unknownEntity"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"unknownEntity someData\""), std::string::npos);
+  expectStderrContains({
+    "Failed to handle: unknownEntity",
+    "Failed to process scene line: \"unknownEntity someData\""
+  });
 }
 TEST_F(SceneParserTest, InvalidFilePathFails) {
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/nonexistent_file.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to open file: test_data/nonexistent_file.txt"), std::string::npos);
+  expectStderrContains({"Failed to open file: test_data/nonexistent_file.txt"});
 }
 TEST_F(SceneParserTest, ModelMissingParametersFails) {
   createTestFile("test_data/model_missing_param.txt", "model, true, true, TestModel, mesh.ply, 0 0 0, 0 0 0, 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/model_missing_param.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse model scale"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse model"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"model, true, true, TestModel, mesh.ply, 0 0 0, 0 0 0, 1 1\""), std::string::npos);
+  expectStderrContains({
+     "Failed to parse model scale",
+     "Failed to parse model",
+     "Failed to process scene line: \"model, true, true, TestModel, mesh.ply, 0 0 0, 0 0 0, 1 1\""
+    });
 }
 TEST_F(SceneParserTest, CameraMissingParametersFails) {
   createTestFile("test_data/camera_missing_param.txt", "camera, true, TestCam, 0 0 -5, 0 0 90, 0.1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/camera_missing_param.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse camera far plane"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse camera"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"camera, true, TestCam, 0 0 -5, 0 0 90, 0.1\""), std::string::npos);
+  expectStderrContains({
+     "Failed to parse camera far plane",
+     "Failed to parse camera",
+     "Failed to process scene line: \"camera, true, TestCam, 0 0 -5, 0 0 90, 0.1\""
+    });
 }
 TEST_F(SceneParserTest, InvalidNumericFormatFails) {
   createTestFile("test_data/invalid_number.txt", "camera, true, TestCam, NaN 0 -5, 0 0 90, 0.1 100 5\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/invalid_number.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse camera position"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse camera"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"camera, true, TestCam, NaN 0 -5, 0 0 90, 0.1 100 5\""), std::string::npos);
+  expectStderrContains({ 
+    "Failed to parse camera position",
+    "Failed to parse camera",
+    "Failed to process scene line: \"camera, true, TestCam, NaN 0 -5, 0 0 90, 0.1 100 5\"" }
+  );
 }
 TEST_F(SceneParserTest, MalformedColourFallback) {
   createTestFile("test_data/invalid_colour.txt", "light true L Point 0 0 0 0 0 0 InvalidColour 1 1 1 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/invalid_colour.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse light diffuse"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true L Point 0 0 0 0 0 0 InvalidColour 1 1 1 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse light diffuse",
+    "Failed to parse light",
+    "Failed to process scene line: \"light true L Point 0 0 0 0 0 0 InvalidColour 1 1 1 1 0 0\"" 
+  });
 }
 TEST_F(SceneParserTest, InvalidLineStopsParsingEarly) {
   createTestFile("test_data/invalid_line.txt",
     "camera true TestCam 0 0 -5 0 0 90 0.1 100 5\n"
     "unknownCommand invalid data\n"
     "light true TestLight Point 0 5 0 0 -1 0 Red 1 0 0 1 0 0\n");
-
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/invalid_line.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to handle: unknownCommand"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"unknownCommand invalid data\""), std::string::npos);
+  expectStderrContains({
+    "Failed to handle: unknownCommand",
+    "Failed to process scene line: \"unknownCommand invalid data\"" 
+  });
   EXPECT_EQ(out.cameras.size(), 1);
   EXPECT_EQ(out.lights.size(), 0);
 }
@@ -392,55 +392,61 @@ TEST_F(SceneParserTest, ModelMissingNameFails) {
   createTestFile("test_data/model_missing_name.txt", "model true true mesh.ply 0 0 0 0 0 0 1 1 1 Red 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/model_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid model name: appears to be a file path"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse model"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"model true true mesh.ply 0 0 0 0 0 0 1 1 1 Red 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Invalid model name: appears to be a file path",
+    "Failed to parse model",
+    "Failed to process scene line: \"model true true mesh.ply 0 0 0 0 0 0 1 1 1 Red 1 1 1 1\"" 
+  });
 }
 TEST_F(SceneParserTest, LightMissingNameFails) {
   createTestFile("test_data/light_missing_name.txt", "light, true, Point, 0 0 0 0 0 0 Red 1 0 0 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/light_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid light name: cannot be a light type"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light, true, Point, 0 0 0 0 0 0 Red 1 0 0 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Invalid light name: cannot be a light type",
+    "Failed to parse light",
+    "Failed to process scene line: \"light, true, Point, 0 0 0 0 0 0 Red 1 0 0 1 0 0\"" 
+  });
 }
 TEST_F(SceneParserTest, CameraMissingNameFails) {
   createTestFile("test_data/camera_missing_name.txt", "camera true 0 0 -5 0 0 90 0.1 100 5\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/camera_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid camera name: cannot start with a digit"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse camera"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"camera true 0 0 -5 0 0 90 0.1 100 5\""), std::string::npos);
+  expectStderrContains({
+    "Invalid camera name: cannot start with a digit",
+    "Failed to parse camera",
+    "Failed to process scene line: \"camera true 0 0 -5 0 0 90 0.1 100 5\"" 
+  });
 }
 TEST_F(SceneParserTest, TextureMissingNameFails) {
   createTestFile("test_data/texture_missing_name.txt", "texture image.png 1.0 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid texture name: appears to be a file path"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse texture"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"texture image.png 1.0 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Invalid texture name: appears to be a file path",
+    "Failed to parse texture",
+    "Failed to process scene line: \"texture image.png 1.0 1 1\"" 
+  });
 }
 TEST_F(SceneParserTest, PrimitiveMissingNameFails) {
   createTestFile("test_data/primitive_missing_name.txt", "triangle 0 0 0 1 0 0 0 1 0 Red 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/primitive_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid primitive name: cannot start with a digit"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse triangle"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"triangle 0 0 0 1 0 0 0 1 0 Red 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Invalid primitive name: cannot start with a digit",
+    "Failed to parse triangle",
+    "Failed to process scene line: \"triangle 0 0 0 1 0 0 0 1 0 Red 1 1 1 1\"" 
+  });
 }
 TEST_F(SceneParserTest, GridMissingNameFails) {
   createTestFile("test_data/grid_missing_name.txt", "squareGrid 10 1.0 0 0 0 0 0 0 0 0 0 Red 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/grid_missing_name.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid grid name: cannot start with a digit"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse square grid"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"squareGrid 10 1.0 0 0 0 0 0 0 0 0 0 Red 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Invalid grid name: cannot start with a digit",
+    "Failed to parse square grid", 
+    "Failed to process scene line: \"squareGrid 10 1.0 0 0 0 0 0 0 0 0 0 Red 1 1 1 1\""
+  });
 }
 
 // Ambient light
@@ -448,17 +454,19 @@ TEST_F(SceneParserTest, AmbientMissingColourComponentFails) {
   createTestFile("test_data/ambient_missing_colour.txt", "ambient true 0.2 0.2\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/ambient_missing_colour.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse ambient colour"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"ambient true 0.2 0.2\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse ambient colour", 
+    "Failed to process scene line: \"ambient true 0.2 0.2\""
+  });
 }
 TEST_F(SceneParserTest, AmbientMissingEnabledFails) {
   createTestFile("test_data/ambient_missing_enabled.txt", "ambient 0.2 0.2 0.3\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/ambient_missing_enabled.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Ambient missing enabled boolean"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"ambient 0.2 0.2 0.3\""), std::string::npos);
+  expectStderrContains({
+    "Ambient missing enabled boolean", 
+    "Failed to process scene line: \"ambient 0.2 0.2 0.3\""
+  });
 }
 
 // Light
@@ -466,39 +474,43 @@ TEST_F(SceneParserTest, LightMissingAttenuationFails) {
   createTestFile("test_data/light_missing_attenuation.txt", "light true TestLight Point 0 5 0 0 -1 0 Red\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/light_missing_attenuation.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse light attenuation"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true TestLight Point 0 5 0 0 -1 0 Red\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse light attenuation",
+    "Failed to parse light",
+    "Failed to process scene line: \"light true TestLight Point 0 5 0 0 -1 0 Red\""
+  });
 }
 TEST_F(SceneParserTest, LightMissingPositionFails) {
   createTestFile("test_data/light_missing_position.txt", "light true TestLight Point\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/light_missing_position.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse light position"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true TestLight Point\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse light position",
+    "Failed to parse light",
+    "Failed to process scene line: \"light true TestLight Point\""
+  });
 }
 TEST_F(SceneParserTest, LightUnknownTypeFails) {
   createTestFile("test_data/light_unknown.txt", "light true TestLight UnknownType 0 0 0 0 0 0 Red 1 0 0 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/light_unknown.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Unknown light type"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light type"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true TestLight UnknownType 0 0 0 0 0 0 Red 1 0 0 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Unknown light type",
+    "Failed to parse light type", 
+    "Failed to parse light",
+    "Failed to process scene line: \"light true TestLight UnknownType 0 0 0 0 0 0 Red 1 0 0 1 0 0\""
+  });
 }
 TEST_F(SceneParserTest, LightInvalidNumericTypeFails) {
   createTestFile("test_data/light_invalid_number.txt", "light true TestLight 99 0 0 0 0 0 0 Red 1 0 0 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/light_invalid_number.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Unknown light type"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light type"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true TestLight 99 0 0 0 0 0 0 Red 1 0 0 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Unknown light type", 
+    "Failed to parse light type",
+    "Failed to parse light", 
+    "Failed to process scene line: \"light true TestLight 99 0 0 0 0 0 0 Red 1 0 0 1 0 0\""
+  });
 }
 
 // Colour 
@@ -506,27 +518,30 @@ TEST_F(SceneParserTest, MalformedNumericColourTooFewComponentsFails) {
   createTestFile("test_data/colour_missing_params.txt", "light true L Point 0 0 0 0 0 0 1.0 1.0 1 0 0 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/colour_missing_params.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find(" Failed to parse light param1"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true L Point 0 0 0 0 0 0 1.0 1.0 1 0 0 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    " Failed to parse light param1",
+    "Failed to parse light",
+    "Failed to process scene line: \"light true L Point 0 0 0 0 0 0 1.0 1.0 1 0 0 1 0 0\""
+  });
 }
 TEST_F(SceneParserTest, MalformedNamedColourFails) {
   createTestFile("test_data/colour_invalid.txt", "light true L Point 0 0 0 0 0 0 reed 1 0 0 1 0 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/colour_invalid.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse light diffuse"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse light"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"light true L Point 0 0 0 0 0 0 reed 1 0 0 1 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse light diffuse",
+    "Failed to parse light",
+    "Failed to process scene line: \"light true L Point 0 0 0 0 0 0 reed 1 0 0 1 0 0\""
+  });
 }
 TEST_F(SceneParserTest, MalformedSpecialColourFails) {
   createTestFile("test_data/colour_invalid_special.txt", "model true true M mesh.ply 0 0 0 0 0 0 1 1 1 XYZRainbow 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/colour_invalid_special.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse model"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"model true true M mesh.ply 0 0 0 0 0 0 1 1 1 XYZRainbow 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse model",
+    "Failed to process scene line: \"model true true M mesh.ply 0 0 0 0 0 0 1 1 1 XYZRainbow 1 1 1 1\""
+  });
 }
 
 // Texture
@@ -534,28 +549,31 @@ TEST_F(SceneParserTest, TextureMissingMixFails) {
   createTestFile("test_data/texture_missing_mix.txt", "texture TestTex image.png 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_missing_mix.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture tiling"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse texture"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"texture TestTex image.png 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse texture tiling",
+    "Failed to parse texture",
+    "Failed to process scene line: \"texture TestTex image.png 1 1\""
+  });
 }
 TEST_F(SceneParserTest, TextureMissingTilingFails) {
   createTestFile("test_data/texture_missing_tiling.txt", "texture TestTex image.png 1.0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_missing_tiling.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture tiling"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse texture"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"texture TestTex image.png 1.0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse texture tiling",
+    "Failed to parse texture",
+    "Failed to process scene line: \"texture TestTex image.png 1.0\""
+  });
 }
 TEST_F(SceneParserTest, TextureCubeMissingFacesFails) {
   createTestFile("test_data/texture_cube_missing_faces.txt", "textureCube SkyBox right.png left.png top.png bottom.png 1.0 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_cube_missing_faces.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid cube map face: missing file extension"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse cube texture"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"textureCube SkyBox right.png left.png top.png bottom.png 1.0 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Invalid cube map face: missing file extension",
+    "Failed to parse cube texture",
+    "Failed to process scene line: \"textureCube SkyBox right.png left.png top.png bottom.png 1.0 1 1\""
+  });
 }
 
 // Texture connection
@@ -567,9 +585,10 @@ TEST_F(SceneParserTest, TextureConnectionInvalidSlotFails) {
   );
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_invalid_slot.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid texture slot index: 99 for model: TestModel"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"textureAdd TestModel 99 TestTex 1.0\""), std::string::npos);
+  expectStderrContains({
+    "Invalid texture slot index: 99 for model: TestModel",
+    "Failed to process scene line: \"textureAdd TestModel 99 TestTex 1.0\""
+  });
 }
 TEST_F(SceneParserTest, TextureConnectionMissingParametersFails) {
   createTestFile("test_data/texture_missing_param.txt",
@@ -577,9 +596,10 @@ TEST_F(SceneParserTest, TextureConnectionMissingParametersFails) {
     "textureAdd TestModel 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_missing_param.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture connection name"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"textureAdd TestModel 0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse texture connection name",
+    "Failed to process scene line: \"textureAdd TestModel 0\""
+  });
 }
 TEST_F(SceneParserTest, TextureConnectionMissingMixFails) {
   createTestFile("test_data/texture_missing_mix.txt",
@@ -588,9 +608,10 @@ TEST_F(SceneParserTest, TextureConnectionMissingMixFails) {
     "textureAdd TestModel 0 TestTex\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/texture_missing_mix.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture connection mix"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"textureAdd TestModel 0 TestTex\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse texture connection mix",
+    "Failed to process scene line: \"textureAdd TestModel 0 TestTex\""
+  });
 }
 
 // Velocity
@@ -600,19 +621,21 @@ TEST_F(SceneParserTest, VelocityMissingComponentsFails) {
     "velocity TestModel 1.0 2.0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/velocity_incomplete.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse velocity vec3"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse velocity"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"velocity TestModel 1.0 2.0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse velocity vec3",
+    "Failed to parse velocity",
+    "Failed to process scene line: \"velocity TestModel 1.0 2.0\"" 
+  });
 }
 TEST_F(SceneParserTest, VelocityMissingModelNameFails) {
   createTestFile("test_data/velocity_missing_model.txt", "velocity 1.0 2.0 3.0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/velocity_missing_model.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Invalid model name: cannot start with a digit"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse velocity"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"velocity 1.0 2.0 3.0\""), std::string::npos);
+  expectStderrContains({
+    "Invalid model name: cannot start with a digit",
+    "Failed to parse velocity",
+    "Failed to process scene line: \"velocity 1.0 2.0 3.0\""
+  });
 }
 
 // Primitives
@@ -620,28 +643,31 @@ TEST_F(SceneParserTest, TriangleMissingColourFails) {
   createTestFile("test_data/triangle_missing_colour.txt", "triangle name 0 0 0 1 0 0 0 1 0\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/triangle_missing_colour.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse primitive colour"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse triangle"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"triangle name 0 0 0 1 0 0 0 1 0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse primitive colour", 
+    "Failed to parse triangle",
+    "Failed to process scene line: \"triangle name 0 0 0 1 0 0 0 1 0\"" 
+  });
 }
 TEST_F(SceneParserTest, SquareMissingScaleFails) {
   createTestFile("test_data/square_missing_scale.txt", "square name 0 0 0 1 0 0 Red 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/square_missing_scale.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse primitive size"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse square"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"square name 0 0 0 1 0 0 Red 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse primitive size",
+    "Failed to parse square",
+    "Failed to process scene line: \"square name 0 0 0 1 0 0 Red 1 1 1 1\""
+  });
 }
 TEST_F(SceneParserTest, CubeMissingPositionFails) {
   createTestFile("test_data/cube_missing_position.txt", "cube name\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/cube_missing_position.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse primitive position"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse cube"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"cube name\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse primitive position", 
+    "Failed to parse cube", 
+    "Failed to process scene line: \"cube name\""
+  });
 }
 
 // Grids
@@ -649,17 +675,19 @@ TEST_F(SceneParserTest, SquareGridMissingSpacingFails) {
   createTestFile("test_data/grid_missing_spacing.txt", "squareGrid Grid1 10 0, 0 0 0, 0 0 0, 0 0  , Red 1 1 1 1\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/grid_missing_spacing.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse grid scale"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse square grid"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"squareGrid Grid1 10 0, 0 0 0, 0 0 0, 0 0  , Red 1 1 1 1\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse grid scale",
+    "Failed to parse square grid",
+    "Failed to process scene line: \"squareGrid Grid1 10 0, 0 0 0, 0 0 0, 0 0  , Red 1 1 1 1\"" 
+  });
 }
 TEST_F(SceneParserTest, CubeGridMissingColourFails) {
   createTestFile("test_data/grid_missing_colour.txt", "cubeGrid GridBox 5 2.0, 0 0 0, 0 0 0, 0 0 0,\n");
   testing::internal::CaptureStderr();
   expectInvalidParse("test_data/grid_missing_colour.txt");
-  const std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse grid colour"), std::string::npos);
-  EXPECT_NE(output.find("Failed to parse cube grid"), std::string::npos);
-  EXPECT_NE(output.find("Failed to process scene line: \"cubeGrid GridBox 5 2.0, 0 0 0, 0 0 0, 0 0 0\""), std::string::npos);
+  expectStderrContains({
+    "Failed to parse grid colour",
+    "Failed to parse cube grid",
+    "Failed to process scene line: \"cubeGrid GridBox 5 2.0, 0 0 0, 0 0 0, 0 0 0\"" 
+  });
 }

@@ -5,25 +5,22 @@
 
 #include "starlet-logger/logger.hpp"
 
-#include <memory>
-
 namespace Starlet::Serializer {
 
 bool MeshParser::parse(const std::string& path, MeshData& out) {
-	std::unique_ptr<MeshParserBase> parser;
 	switch (detectFormat(path)) {
-	case MeshFormat::PLY:
-		parser = std::make_unique<PlyParser>();
-		break;
-	case MeshFormat::OBJ:
-	  parser = std::make_unique<ObjParser>();
-		break;
+	case MeshFormat::PLY: {
+		PlyParser parser;
+		return parser.parse(path, out);
+	}
+	case MeshFormat::OBJ: {
+		ObjParser parser;
+		return parser.parse(path, out);
+	}
 	default:
 		Logger::error("MeshParser", "parse", "Unsupported mesh format: " + path);
 		return false;
 	}
-
-	return parser->parse(path, out);
 }
 
 MeshParser::MeshFormat MeshParser::detectFormat(const std::string& path) {

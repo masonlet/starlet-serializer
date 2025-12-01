@@ -1,6 +1,7 @@
 #pragma once
 
-#include "mesh_parser_base.hpp"
+#include "starlet-serializer/parser/parser.hpp"
+
 #include <vector>
 
 namespace Starlet {
@@ -14,7 +15,7 @@ namespace Math {
 namespace Serializer {
 	struct MeshData;
 
-	class ObjParser : public MeshParserBase {
+	class ObjParser : public Parser {
 	public:
 		bool parse(const std::string& path, MeshData& out);
 

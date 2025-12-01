@@ -1,12 +1,12 @@
 #pragma once
 
-#include "mesh_parser_base.hpp"
+#include "starlet-serializer/parser/parser.hpp"
 
 namespace Starlet::Serializer {
 
 struct MeshData;
 
-class PlyParser : public MeshParserBase {
+class PlyParser : public Parser {
 public:
 	bool parse(const std::string& path, MeshData& out);
 
