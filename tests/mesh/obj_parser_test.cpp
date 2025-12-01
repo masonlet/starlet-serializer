@@ -331,8 +331,7 @@ TEST_F(ObjParserTest, ScientificNotation) {
 
 TEST_F(ObjParserTest, TexCoordExtraComponents) {
   createTestFile("test_data/tc_extra.obj", "v 0 0 0\nvt 0.5 0.5 1.0 extra junk\nf 1/1 1/1 1/1\n");
-  EXPECT_TRUE(parser.parse("test_data/tc_extra.obj", out));
-  EXPECT_EQ(out.numVertices, 1);
+  expectValidParse("test_data/tc_extra.obj", 1, 1);
 }
 
 TEST_F(ObjParserTest, InterleavedCommands) {
@@ -356,9 +355,8 @@ TEST_F(ObjParserTest, ObjectCommand) {
 
 TEST_F(ObjParserTest, LargeFile) {
   std::string content;
-  for (int i = 0; i < 1000; i++)
+  for (int i = 0; i < 1000; i++) 
     content += "v " + std::to_string(i) + " 0 0\n";
-
   for (int i = 0; i < 300; i++) {
     int v1 = i * 3 + 1;
     int v2 = i * 3 + 2;
@@ -366,11 +364,8 @@ TEST_F(ObjParserTest, LargeFile) {
     if (v3 <= 1000) 
       content += "f " + std::to_string(v1) + " " + std::to_string(v2) + " " + std::to_string(v3) + "\n";
   }
-
   createTestFile("test_data/large.obj", content);
-  EXPECT_TRUE(parser.parse("test_data/large.obj", out));
-  EXPECT_EQ(out.numVertices, 900);  
-  EXPECT_EQ(out.numTriangles, 300);
+  expectValidParse("test_data/large.obj", 900, 300);
 }
 
 
@@ -378,11 +373,9 @@ TEST_F(ObjParserTest, LargeFile) {
 // Error tests
 TEST_F(ObjParserTest, EmptyFile) {
   createTestFile("test_data/empty.obj", "");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/empty.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("File is empty"), std::string::npos);
+  expectInvalidParse("test_data/empty.obj");
+  expectStderrContains({ "File is empty" });
 }
 
 
@@ -390,49 +383,43 @@ TEST_F(ObjParserTest, EmptyFile) {
 TEST_F(ObjParserTest, VertexMissingZ) {
   createTestFile("test_data/missing_z.obj", "v 1.0 2.0\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/missing_z.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse vertex position at vertex 0"), std::string::npos);
+  expectInvalidParse("test_data/missing_z.obj");
+  expectStderrContains({ "Failed to parse vertex position at vertex 0" });
 }
 
 TEST_F(ObjParserTest, VertexInvalidFloat) {
   createTestFile("test_data/invalid_float.obj", "v 1.0 abc 3.0\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/invalid_float.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse vertex position"), std::string::npos);
+  expectInvalidParse("test_data/invalid_float.obj");
+  expectStderrContains({ "Failed to parse vertex position" });
 }
 
 TEST_F(ObjParserTest, TextureCoordMissingV) {
   createTestFile("test_data/tc_missing.obj", "vt 0.5\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/tc_missing.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture coordinate at texCoord 0"), std::string::npos);
+  expectInvalidParse("test_data/tc_missing.obj");
+  expectStderrContains({ "Failed to parse texture coordinate at texCoord 0" });
 }
 
 TEST_F(ObjParserTest, TextureCoordInvalid) {
   createTestFile("test_data/tc_invalid.obj", "vt abc 0.5\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/tc_invalid.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse texture coordinate"), std::string::npos);
+  expectInvalidParse("test_data/tc_invalid.obj");
+  expectStderrContains({ "Failed to parse texture coordinate" });
 }
 
 TEST_F(ObjParserTest, NormalMissingZ) {
   createTestFile("test_data/norm_missing.obj", "vn 0.0 1.0\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/norm_missing.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse normal at normal 0"), std::string::npos);
+  expectInvalidParse("test_data/norm_missing.obj");
+  expectStderrContains({ "Failed to parse normal at normal 0" });
 }
 
 TEST_F(ObjParserTest, NormalInvalid) {
   createTestFile("test_data/norm_invalid.obj", "vn 0.0 abc 1.0\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/norm_invalid.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Failed to parse normal"), std::string::npos);
+  expectInvalidParse("test_data/norm_invalid.obj");
+  expectStderrContains({ "Failed to parse normal" });
 }
 
 
@@ -440,33 +427,29 @@ TEST_F(ObjParserTest, NormalInvalid) {
 TEST_F(ObjParserTest, FaceIndexZero) {
   createTestFile("test_data/zero_index.obj", "v 0 0 0\nf 0 1 2\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/zero_index.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Face index cannot be 0"), std::string::npos);
+  expectInvalidParse("test_data/zero_index.obj");
+  expectStderrContains({ "Face index cannot be 0" });
 }
 
 TEST_F(ObjParserTest, FaceIndexOutOfBounds) {
   createTestFile("test_data/bounds.obj", "v 0 0 0\nf 1 2 3\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/bounds.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Face index out of bounds"), std::string::npos);
+  expectInvalidParse("test_data/bounds.obj");
+  expectStderrContains({ "Face index out of bounds" });
 }
 
 TEST_F(ObjParserTest, VeryLargeIndex) {
   createTestFile("test_data/huge_idx.obj", "v 0 0 0\nf 9999999 1 2\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/huge_idx.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("out of bounds"), std::string::npos);
+  expectInvalidParse("test_data/huge_idx.obj");
+  expectStderrContains({ "out of bounds" });
 }
 
 TEST_F(ObjParserTest, FaceTooFewVertices) {
   createTestFile("test_data/few_verts.obj", "v 0 0 0\nv 1 0 0\nf 1 2\n");
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/few_verts.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Face has fewer than 3 vertices"), std::string::npos);
+  expectInvalidParse("test_data/few_verts.obj");
+  expectStderrContains({ "Face has fewer than 3 vertices" });
 }
 
 
@@ -474,29 +457,24 @@ TEST_F(ObjParserTest, FaceTooFewVertices) {
 TEST_F(ObjParserTest, TrailingSlashInFace) {
   createTestFile("test_data/trail_slash.obj",
     "v 0 0 0\nv 1 0 0\nvt 0.5 0.5\nf 1/ 2/1\n");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/trail_slash.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("index"), std::string::npos);
+  expectInvalidParse("test_data/trail_slash.obj");
+  expectStderrContains({ "index" });
 }
 
 TEST_F(ObjParserTest, FaceMissingNormalIndex) {
   createTestFile("test_data/missing_norm_idx.obj",
     "v 0 0 0\nv 1 0 0\nv 0 1 0\nvt 0 0\nvt 1 0\nf 1/1 2/2 3/\n");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/missing_norm_idx.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Expected texture coordinate index"), std::string::npos);
+  expectInvalidParse("test_data/missing_norm_idx.obj");
+  expectStderrContains({ "Expected texture coordinate index" });
 }
  
 TEST_F(ObjParserTest, BareSlashMalformed) {
   createTestFile("test_data/bare_slash.obj",
     "v 0 0 0\nv 1 0 0\nv 0 1 0\nvn 0 0 1\nf 1// 2/3/ 3//\n");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/bare_slash.obj", out));
+  expectInvalidParse("test_data/bare_slash.obj");
   std::string output = testing::internal::GetCapturedStderr();
   EXPECT_FALSE(output.empty());
 }
@@ -504,9 +482,7 @@ TEST_F(ObjParserTest, BareSlashMalformed) {
 TEST_F(ObjParserTest, FaceIndexMissingIndexAfterFirstSlash) {
   createTestFile("test_data/empty_after_slash.obj",
     "v 0 0 0\nvn 0 0 1\nf 1/ /1\n");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/empty_after_slash.obj", out));
-  std::string output = testing::internal::GetCapturedStderr();
-  EXPECT_NE(output.find("Expected texture coordinate index"), std::string::npos);
+  expectInvalidParse("test_data/empty_after_slash.obj");
+  expectStderrContains({ "Expected texture coordinate index" });
 }

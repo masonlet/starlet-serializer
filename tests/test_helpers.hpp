@@ -3,7 +3,6 @@
 
 #include "starlet-serializer/parser/image_parser.hpp"
 #include "starlet-serializer/data/image_data.hpp"
-
 #include "starlet-serializer/parser/mesh_parser.hpp"
 #include "starlet-serializer/data/mesh_data.hpp"
 
@@ -23,6 +22,12 @@ inline void createBinaryFile(const std::string& path, const std::vector<unsigned
   std::filesystem::create_directories(p.parent_path());
   std::ofstream file(path, std::ios::binary);
   file.write(reinterpret_cast<const char*>(data.data()), data.size());
+}
+
+inline void expectStderrContains(const std::vector<std::string>& expectedSubstrings) {
+  std::string output = testing::internal::GetCapturedStderr();
+  for (const std::string& substring : expectedSubstrings)
+    EXPECT_NE(output.find(substring), std::string::npos) << "Expected to find: \"" << substring << "\" in stderr output";
 }
 
 class ImageParserTest : public ::testing::Test {

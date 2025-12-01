@@ -3,82 +3,61 @@
 // PLY format detection
 TEST_F(MeshParserTest, DetectFormatPlyLowercase) {
   createTestFile("test_data/model.ply", "ply");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.ply", out));
-  std::string output = testing::internal::GetCapturedStderr();
-    
-  // PLY extension was properly detected and routed to PlyParser
-  EXPECT_NE(output.find("PlyParser"), std::string::npos);
+  expectInvalidParse("test_data/model.ply");
+  expectStderrContains({ "PlyParser" });
 }
 
 TEST_F(MeshParserTest, DetectFormatPlyUppercase) {
   createTestFile("test_data/model.PLY", "ply");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.PLY", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  // PLY extension was properly detected and routed to PlyParser
-  EXPECT_NE(output.find("PlyParser"), std::string::npos);
+  expectInvalidParse("test_data/model.PLY");
+  expectStderrContains({ "PlyParser" });
 }
 
 TEST_F(MeshParserTest, DetectFormatPlyMixedCase) {
   createTestFile("test_data/model.PlY", "ply");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.PlY", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  // PLY extension was properly detected and routed to PlyParser
-  EXPECT_NE(output.find("PlyParser"), std::string::npos);
+  expectInvalidParse("test_data/model.PlY");
+  expectStderrContains({ "PlyParser" });
 }
 
 
 // OBJ format detection
 TEST_F(MeshParserTest, DetectFormatObjLowercase) {
   createTestFile("test_data/model.obj", "# obj");
-  EXPECT_TRUE(parser.parse("test_data/model.obj", out));
+  expectValidParse("test_data/model.obj", 0, 0);
 }
 
 TEST_F(MeshParserTest, DetectFormatObjUppercase) {
   createTestFile("test_data/model.OBJ", "# obj");
-  EXPECT_TRUE(parser.parse("test_data/model.OBJ", out));
+  expectValidParse("test_data/model.OBJ", 0, 0);
 }
 
 TEST_F(MeshParserTest, DetectFormatObjMixedCase) {
   createTestFile("test_data/model.ObJ", "# obj");
-  EXPECT_TRUE(parser.parse("test_data/model.ObJ", out));
+  expectValidParse("test_data/model.ObJ", 0, 0);
 }
 
 
 // Edge cases
 TEST_F(MeshParserTest, DetectFormatNoExtension) {
   createTestFile("test_data/model", "");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  EXPECT_NE(output.find("Unsupported mesh format: test_data/model"), std::string::npos);
+  expectInvalidParse("test_data/model");
+  expectStderrContains({ "Unsupported mesh format: test_data/model" });
 }
 
 TEST_F(MeshParserTest, DetectFormatUnknownExtension) {
   createTestFile("test_data/model.unknown", "");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.unknown", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  EXPECT_NE(output.find("Unsupported mesh format: test_data/model.unknown"), std::string::npos);
+  expectInvalidParse("test_data/model.unknown");
+  expectStderrContains({ "Unsupported mesh format: test_data/model.unknown" });
 }
 
 TEST_F(MeshParserTest, DetectFormatEmptyExtension) {
   createTestFile("test_data/model.", "");
-
   testing::internal::CaptureStderr();
-  EXPECT_FALSE(parser.parse("test_data/model.", out));
-  std::string output = testing::internal::GetCapturedStderr();
-
-  EXPECT_NE(output.find("Unsupported mesh format: test_data/model."), std::string::npos);
+  expectInvalidParse("test_data/model.");
+  expectStderrContains({ "Unsupported mesh format: test_data/model." });
 }
