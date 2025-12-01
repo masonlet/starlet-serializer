@@ -8,8 +8,12 @@ A lightweight serialization library for **Starlet** projects to handle both data
 
 ## Features
 ### File Format Support
-- **Images**: BMP (24-bit), TGA (24/32-bit uncompressed)
-- **Meshes**: PLY (ASCII format with vertices, normals, colors, texture coordinates)
+- **Images**:
+  - BMP (24-bit)
+  - TGA (24/32-bit uncompressed)
+- **Meshes**:
+  - PLY (ASCII w/ positions, normals, colors, texture coordinates)
+  - OBJ (positions, normals, texture coordinates, vertex colors, n-gon triangulation)
 - **Scenes**: Custom text-based scene format with models, lights, cameras, textures, primitives
 
 ### Core Utilities
